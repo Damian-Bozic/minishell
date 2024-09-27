@@ -63,6 +63,7 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include "Libft/libft.h"
+# include "built_in_functions/built_in_functions.h"
 
 int	db_error(char *error_message, int error_code);
 

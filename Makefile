@@ -13,7 +13,8 @@
 CC = cc
 FLAGS = -Wall -Wextra -Werror
 MAIN = minishell.c
-SOURCES = helper_functions/db_error.c
+SOURCES = helper_functions/db_error.c built_in_functions/ft_echo.c \
+		built_in_functions/ft_pwd.c built_in_functions/ft_cd.c
 OBJECTS = $(SOURCES:%.c=%.o)
 NAME = minishell.a
 PROGRAM = minishell

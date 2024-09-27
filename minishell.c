@@ -17,19 +17,33 @@
 
 int	main(void)
 {
-	char	*input_line;
+	// char	*input_line;
 
-	while (1)
-	{
-		input_line = NULL;
-		input_line = readline(GREEN"Zabka"CYAN"42: "RESET);
-		if (strcmp(input_line, "exit") == 0)
-		{
-			ft_printf("exiting\n");
-			free(input_line);
-			break ;
-		}
-		ft_printf("%s\n", input_line);
-		free(input_line);
-	}
+    // while(*envp)
+	// {
+    //     printf("%s\n", *envp++);
+	// }
+	db_error("error check", 0);
+	ft_pwd();
+	ft_echo(1, "with -n flag");
+	ft_echo(0, "without -n flag");
+	ft_cd("/nfs/homes");
+	ft_pwd();
+	ft_cd("/nfs/homes/dbozic");
+	ft_pwd();
+	ft_cd("/nfs/homes/dbozic/minishell");
+	ft_pwd();
+	// while (1)
+	// {
+	// 	input_line = NULL;
+	// 	input_line = readline(GREEN"Zabka"CYAN"42: "RESET);
+	// 	if (strcmp(input_line, "exit") == 0)
+	// 	{
+	// 		ft_printf("exiting\n");
+	// 		free(input_line);
+	// 		break ;
+	// 	}
+	// 	ft_printf("%s\n", input_line);
+	// 	free(input_line);
+	// }
 }
