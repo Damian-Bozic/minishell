@@ -13,7 +13,7 @@
 CC = cc
 FLAGS = -Wall -Wextra -Werror
 MAIN = minishell.c
-SOURCES = 
+SOURCES = helper_functions/db_error.c
 OBJECTS = $(SOURCES:%.c=%.o)
 NAME = minishell.a
 PROGRAM = minishell
@@ -44,8 +44,10 @@ fclean: clean
 cc:
 	$(CC) $(FLAGS) $(MAIN) $(NAME) $(LIBFT) -lreadline -o $(PROGRAM)
 
-re: fclean all
+wf:
+	$(CC) $(MAIN) $(NAME) $(LIBFT) -lreadline -o $(PROGRAM)
 
+re: fclean all
 
 full: all clean
 	clear

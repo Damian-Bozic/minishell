@@ -64,5 +64,6 @@
 # include <readline/history.h>
 # include "Libft/libft.h"
 
+int	db_error(char *error_message, int error_code);
 
 #endif
