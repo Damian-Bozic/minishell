@@ -75,5 +75,6 @@ t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 // CUSTOM
 
 size_t	ft_strclen(const char *str, char c);
+int		ft_strcmp(const char *str1, const char *str2);
 
 #endif

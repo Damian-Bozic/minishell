@@ -19,7 +19,7 @@
 int	ft_echo(int flag, char *input)
 {
 	int		i;
-	
+
 	i = 0;
 	if (flag > 1 || flag < 0)
 		return (db_error("ft_echo recieved an invalid flag", 0));
@@ -30,25 +30,3 @@ int	ft_echo(int flag, char *input)
 		printf("\n");
 	return (1);
 }
-
-// OLD vvv
-
-// INPUT: echo takes the raw input
-// $ARGS must be handled beforehand
-// RETURN: echo returns 0 upon error, 1 upon success, it will print its own error
-
-// quote 0 =   1 = ' 2 = "
-
-// static void sort_char(int c)
-// {
-// 	static int	quote_type = 0;
-
-// 	if (quote_type == 0 && c == 39)
-// 		quote_type = 1;
-// 	else if (quote_type == 0 && c == 34)
-// 		quote_type = 2;
-// 	else if ((quote_type == 1 && c == 39) || (quote_type == 2 && c == 34))
-// 		quote_type = 0;
-// 	else if (quote_type == 1)
-// 		printf("%c", c);
-// }

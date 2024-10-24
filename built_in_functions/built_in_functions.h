@@ -20,8 +20,22 @@
 #  define PATH_MAX 8192
 # endif
 
-int	ft_pwd(void);
-int	ft_echo(int flag, char *input);
-int	ft_cd(char *input);
+typedef struct s_envs
+{
+	char			*name;
+	char			*contents;
+	struct s_envs	*next;
+}	t_envs;
+
+int		ft_pwd(void);
+int		ft_echo(int flag, char *input);
+int		ft_cd(char *input);
+
+t_envs	*init_envs(char **envp, t_envs *head, t_envs *current, t_envs *last);
+int		free_envs(t_envs *envs);
+t_envs	*find_in_env_list(char *name, t_envs *envs);
+int		ft_export(char *var_name, char *contents, t_envs *envs);
+int		ft_unset(char *var_name, t_envs *envs);
+int		ft_env(t_envs *envs);
 
 #endif

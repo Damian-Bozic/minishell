@@ -1,38 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_pwd.c                                           :+:      :+:    :+:   */
+/*   ft_strcmp.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbozic <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/25 16:22:04 by dbozic            #+#    #+#             */
-/*   Updated: 2024/09/25 16:22:23 by dbozic           ###   ########.fr       */
+/*   Created: 2024/10/23 13:55:44 by dbozic            #+#    #+#             */
+/*   Updated: 2024/10/23 13:56:07 by dbozic           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "built_in_functions.h"
+#include "libft.h"
 
-// returns 0 on error
-// returns 1 on success
-
-int	ft_pwd(void)
+int	ft_strcmp(const char *str1, const char *str2)
 {
-	char	*cwd;
+	size_t	i;
 
-	cwd = malloc(PATH_MAX);
-	if (!cwd)
-		return (db_error("Malloc fail in ft_pwd", 0));
-	if (getcwd(cwd, PATH_MAX) != NULL)
-	{
-		printf("%s\n", cwd);
-		free(cwd);
-		return (1);
-	}
-	free(cwd);
-	return (db_error("ft_pwd failed to getcwd", 0));
+	i = 0;
+	while (str1[i] && str1[i] == str2[i])
+		i++;
+	return ((unsigned char)str1[i] - (unsigned char)str2[i]);
 }
-
-// int	main(void)
-// {
-// 	ft_pwd();
-// }

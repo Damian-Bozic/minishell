@@ -14,10 +14,18 @@
 
 int	db_error(char *error_message, int error_code)
 {
-	write(2, BOLDRED"Error\n"LINERED, 5 + sizeof(BOLDRED) + sizeof(LINERED));
+	write(2, BOLDRED"Error\n", 6 + sizeof(BOLDRED));
 	write(2, error_message, ft_strlen(error_message));
 	write(2, "\n"RESET, sizeof(RESET));
 	return (error_code);
+}
+
+void	*db_nerror(char *error_message)
+{
+	write(2, BOLDRED"Error\n", 6 + sizeof(BOLDRED));
+	write(2, error_message, ft_strlen(error_message));
+	write(2, "\n"RESET, sizeof(RESET));
+	return (NULL);
 }
 
 // int	main(void)

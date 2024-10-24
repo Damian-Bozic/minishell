@@ -12,38 +12,46 @@
 
 #include "minishell.h"
 #include <termios.h>
-// In order to make the history and other things to work, we will need to be
-// able to detect escape key inputs like arrow keys and ctrl keys
+#include "signal.h"
 
-int	main(void)
-{
-	// char	*input_line;
+// int	main(int argc, char **argv, char **envp)
+// {
+// 	printf("%d, %s\n", argc, argv[0]);
+// 	t_envs	*envs;
 
-    // while(*envp)
-	// {
-    //     printf("%s\n", *envp++);
-	// }
-	db_error("error check", 0);
-	ft_pwd();
-	ft_echo(1, "with -n flag");
-	ft_echo(0, "without -n flag");
-	ft_cd("/nfs/homes");
-	ft_pwd();
-	ft_cd("/nfs/homes/dbozic");
-	ft_pwd();
-	ft_cd("/nfs/homes/dbozic/minishell");
-	ft_pwd();
-	// while (1)
-	// {
-	// 	input_line = NULL;
-	// 	input_line = readline(GREEN"Zabka"CYAN"42: "RESET);
-	// 	if (strcmp(input_line, "exit") == 0)
-	// 	{
-	// 		ft_printf("exiting\n");
-	// 		free(input_line);
-	// 		break ;
-	// 	}
-	// 	ft_printf("%s\n", input_line);
-	// 	free(input_line);
-	// }
-}
+// 	envs = init_envs(envp, NULL, NULL, NULL);
+// 	if (!envs)
+// 		return (0);
+// 	ft_env(envs);
+// 	ft_export(ft_strdup("CHEESE"), ft_strdup("cheesewow"), envs);
+// 	ft_export(ft_strdup("CHEESE"), ft_strdup("wow"), envs);
+// 	ft_export(ft_strdup("CHEESESSSSS"), ft_strdup("wow"), envs);
+// 	ft_env(envs);
+// 	printf("\n\n\n");
+// 	ft_unset("CHEESE", envs);
+// 	ft_env(envs);
+// 	printf("\n\n\n");
+// 	ft_unset("CHEESE", envs);
+// 	ft_unset("CHEESESSSS", envs);
+// 	ft_env(envs);
+// 	printf("\n\n\n");
+// 	ft_export(ft_strdup(""), ft_strdup(""), envs);
+// 	ft_env(envs);
+// 	printf("\n\n\n");
+// 	free_envs(envs);
+
+// 	db_error("error check", 0);
+// 	ft_pwd();
+// 	ft_echo(1, "with -n flag");
+// 	ft_echo(0, "without -n flag");
+// 	ft_cd("Libft");
+// 	ft_pwd();
+// 	ft_cd("..");
+// 	ft_pwd();
+// 	ft_cd("/");
+// 	ft_pwd();
+// 	ft_cd("");
+// 	ft_pwd();
+// 	ft_cd("wow");
+// 	ft_pwd();
+// }
