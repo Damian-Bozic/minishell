@@ -46,10 +46,8 @@ static int	ft_puthex(size_t	n, int x)
 int	ft_printf_xx(int d, int x)
 {
 	int		n;
-	int		rtn;
 
 	n = d;
-	rtn = 0;
 	if (n == 0)
 	{
 		write(1, "0", 1);

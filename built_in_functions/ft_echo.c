@@ -18,9 +18,6 @@
 
 int	ft_echo(int flag, char *input)
 {
-	int		i;
-
-	i = 0;
 	if (flag > 1 || flag < 0)
 		return (db_error("ft_echo recieved an invalid flag", 0));
 	if (!input)
