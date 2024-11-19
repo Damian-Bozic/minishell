@@ -91,7 +91,6 @@ int	main(int argc, char **argv, char **envp)
 
 	pipex();
 
-
 	// char	*str;
 
 	// str = read_doc("test.txt");
