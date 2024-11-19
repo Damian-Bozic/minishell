@@ -39,8 +39,10 @@ t_envs	*find_in_env_list(char *name, t_envs *envs);
 int		ft_export(char *var_name, char *contents, t_envs *envs);
 int		ft_unset(char *var_name, t_envs *envs);
 int		ft_env(t_envs *envs);
+char	**convert_envs_to_envp(t_envs *envs);
 
-char	*read_doc(char	*filename);
+
+char	*read_doc(char *filename);
 int		write_doc(char *filename, char *content);
 int		append_doc(char *filename, char *content);
 
