@@ -100,7 +100,6 @@ char **convert_envs_to_envp(t_envs *envs)
 		current = current->next;
 		i++;
 	}
-	ft_printf("calloc requesting %i of size %i\n", i, sizeof(char *));
 	rtn = (char **)ft_calloc(i + 1, sizeof(char *));
 	if (!rtn)
 		return(db_nerror("malloc fail in convert_envs"));

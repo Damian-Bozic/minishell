@@ -29,13 +29,13 @@ int	ft_cd(char *input)
 			return (db_error("No HOME environmental variable found", 0));
 		if (chdir(dir) == -1)
 		{
-			printf("Invalid change directory\n");
+			printf("No such file or directory\n");
 			return (2);
 		}
 	}
 	else if (chdir(input) == -1)
 	{
-		printf("Invalid change directory\n");
+		printf("No such file or directory\n");
 		return (2);
 	}
 	return (1);
