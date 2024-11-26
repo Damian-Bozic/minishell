@@ -16,29 +16,6 @@
 // returns 1 on success
 // returns 2 on invalid directory change
 
-char	*ft_getenv(char *env_name, char **envp)
-{
-	int		i;
-	char	*rtn;
-
-	i = 0;
-	rtn = NULL;
-	if (!envp)
-		return (db_nerror("ft_getenv recieved NULL envp"));
-	if (!env_name)
-		return (db_nerror("ft_getenv recieved NULL input"));
-	while (envp[i])
-	{
-		if (ft_strncmp(env_name, envp[i], ft_strlen(env_name)) == 0)
-		{
-			rtn = &envp[i][ft_strlen(env_name) + 1];
-			break ;
-		}
-		i++;
-	}
-	return (rtn);
-}
-
 int	ft_cd(char **argv, char **envp)
 {
 	char	*dir;
