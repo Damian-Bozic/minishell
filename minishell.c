@@ -57,6 +57,35 @@ static void free_ptr_array(char **ptr_array)
 	ptr_array = NULL;
 }
 
+
+char **db_dup_arr_of_str(char **array)
+{
+	int		i;
+	int		n;
+	char	**rtn;
+
+	i = 0;
+	n = 0;
+	if (!array)
+		return (NULL);
+	while (array[n])
+		n++;
+	rtn = (char **)ft_calloc(n + 1, sizeof(char *));
+	if (!rtn)
+		return (NULL);
+	while (i < n)
+	{
+		rtn[i] = ft_strdup(array[i]);
+		if (!rtn[i])
+		{
+			free_ptr_array(rtn);
+			return (NULL);
+		}
+		i++;
+	}
+	return (rtn);
+}
+
 // /!\ INPUTS /!\
 //
 // Commands
@@ -242,7 +271,55 @@ void close_all_unused_pipes(t_pipex *pipex, int pipe_out, int pipe_in)
 	}
 }
 
-int pipex(char **input, char **envp)
+void exec_addon(t_pipex *pipex, int cmd_no)
+{
+	char	**flags;
+	char	**envp;
+	char	*dir;
+
+	flags = db_dup_arr_of_str(pipex->flags[cmd_no]);
+	envp = db_dup_arr_of_str(pipex->envp);
+	dir = ft_strdup(pipex->dir[cmd_no]);
+	free_pipex(pipex);
+	if (!flags || !dir || !envp)
+	{
+		db_nerror("malloc fail in pipex");
+		free_ptr_array(flags);
+		free_ptr_array(envp);
+		if (!dir)
+			free(dir);
+		return ;
+	}
+	if (execve(dir, flags, envp) == -1)
+    {
+		free_ptr_array(flags);
+		free_ptr_array(flags);
+		free(dir);
+        db_nerror("execve error in pipex");
+    }
+}
+
+	// else if (ft_strcmp(dir, "/bin/export"))
+	// 	ft_export(var_name, contents, envs);
+	// else if (ft_strcmp(dir, "/bin/unset"))
+	// 	ft_unset(argv[1], envs);
+
+int	exec_builtin(char *dir, char **argv, char **envp, t_envs *envs)
+{
+	if (ft_strcmp(dir, "/bin/echo") == 0)
+		ft_echo(argv, envp);
+	else if (ft_strcmp(dir, "/bin/cd") == 0)
+		ft_cd(argv, envp);
+	else if (ft_strcmp(dir, "/bin/env") == 0)
+		ft_env(envs);
+	else if (ft_strcmp(dir, "/bin/pwd") == 0)
+		ft_pwd();
+	else
+		return (0);
+	return (1);
+}
+
+int pipex(char **input, char **envp, t_envs *envs)
 {
 	t_pipex	*pipex;
 	int		i;
@@ -306,16 +383,14 @@ int pipex(char **input, char **envp)
 				dup2(pipex->fd[i - 1][0], STDIN_FILENO);
 				close(pipex->fd[i - 1][0]);
 			}
-
-			// ft_printf("closing fds %d\n", i);
-			//check for in built commands!!!
-			//free everything other than dir and flags here
-			if (execve(pipex->dir[i], pipex->flags[i], pipex->envp) == -1)
-    		{
-            	free_pipex(pipex);
-            	return (db_error("execve error", 0));
-    		}
-			return (1);
+			if (exec_builtin(pipex->dir[i], pipex->flags[i], pipex->envp, envs))
+			{
+				free_pipex(pipex);
+				return (1);
+			}
+			else
+				exec_addon(pipex, i);
+			return (0);
 		}
 		i++;
 	}
@@ -344,17 +419,20 @@ int	main(int argc, char **argv, char **envp)
 	char	**input;
 
 	input = (char **)ft_calloc(128, sizeof(char *));
-	input[0] = ft_strdup("ls");
-	input[1] = ft_strdup("-l");
-	input[2] = ft_strdup("'PIPE");
-	input[3] = ft_strdup("wc");
-	input[4] = ft_strdup("-l");
-	input[5] = ft_strdup("'PIPE");
-	input[6] = ft_strdup("wc");
-	input[7] = ft_strdup("-c");
+	input[0] = ft_strdup("env");
+	// input[1] = NULL; // ft_strdup("$HOME/minishell");
+	// input[2] = NULL; // ft_strdup("'PIPE");
+	// input[3] = ft_strdup("cd");
+	input[1] = ft_strdup("'PIPE");
+	input[2] = ft_strdup("wc");
+	input[3] = ft_strdup("-l");
+	input[4] = NULL;
+	// input[5] = ft_strdup("'PIPE");
+	// input[6] = ft_strdup("wc");
+	// input[7] = ft_strdup("-c");
 	input[8] = NULL;
 
-	pipex(input, convert_envs_to_envp(envs));
+	pipex(input, convert_envs_to_envp(envs), envs);
 	free_envs(envs);
 
 	// char	*str;

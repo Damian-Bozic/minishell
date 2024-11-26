@@ -10,36 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "built_in_functions.h"
-
-static char	*ft_strjoin_mod(char *alstr, char *str, size_t s1_n, size_t s2_n)
-{
-	size_t		i;
-	size_t		j;
-	char		*rtn;
-
-	i = 0;
-	j = 0;
-	rtn = malloc(s1_n + s2_n + 1);
-	if (!rtn)
-		free(alstr);
-	if (!rtn)
-		return (NULL);
-	while (i < s1_n)
-	{
-		rtn[i] = alstr[i];
-		i++;
-	}
-	while (j < s2_n)
-	{
-		rtn[i + j] = str[j];
-		j++;
-	}
-	rtn[i + j] = '\0';
-	free(alstr);
-	alstr = NULL;
-	return (rtn);
-}
+#include "execution.h"
 
 static char	*read_doc2(int fd, char *buffer, char *rtn)
 {

@@ -10,36 +10,91 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "built_in_functions.h"
+#include "execution.h"
 
 // returns 0 on error
 // returns 1 on success
 // returns 2 on invalid directory change
 
-int	ft_cd(char *input)
+char	*ft_getenv(char *env_name, char **envp)
+{
+	int		i;
+	char	*rtn;
+
+	i = 0;
+	rtn = NULL;
+	if (!envp)
+		return (db_nerror("ft_getenv recieved NULL envp"));
+	if (!env_name)
+		return (db_nerror("ft_getenv recieved NULL input"));
+	while (envp[i])
+	{
+		if (ft_strncmp(env_name, envp[i], ft_strlen(env_name)) == 0)
+		{
+			rtn = &envp[i][ft_strlen(env_name) + 1];
+			break ;
+		}
+		i++;
+	}
+	return (rtn);
+}
+
+int	ft_cd(char **argv, char **envp)
 {
 	char	*dir;
 
-	if (!input)
-		return (db_error("ft_cd recieved a NULL input", 0));
-	if (!input[0])
+	dir = NULL;
+	if (!argv)
+		return (db_error("ft_cd recieved a NULL argv", 0));
+	if (argv[0] && argv[1] && argv[2])
+		return (db_error("ft_cd recieved too many arguments", 0));
+	if (!argv[1])
 	{
-		dir = getenv("HOME");
-		if (!dir)
-			return (db_error("No HOME environmental variable found", 0));
-		if (chdir(dir) == -1)
-		{
-			printf("No such file or directory\n");
-			return (2);
-		}
+		if (chdir(ft_getenv("HOME", envp)) == -1)
+			return (db_error("ft_cd failed to find a $HOME directory", 0));
+		return (1);
 	}
-	else if (chdir(input) == -1)
+	dir = filter_argv(argv[1], envp);
+	if (!dir)
+		return (db_error("malloc fail in ft_cd", 0));
+	if (chdir(dir) == -1)
 	{
-		printf("No such file or directory\n");
-		return (2);
+		ft_printf("no such file or directory: %s\n", dir);
+		free(dir);
+		return (0);
 	}
+	free(dir);
 	return (1);
 }
+
+// returns 0 on error
+// returns 1 on success
+// returns 2 on invalid directory change
+
+// int	ft_cd(char *input)
+// {
+// 	char	*dir;
+
+// 	if (!input)
+// 		return (db_error("ft_cd recieved a NULL input", 0));
+// 	if (!input[0])
+// 	{
+// 		dir = getenv("HOME");
+// 		if (!dir)
+// 			return (db_error("No HOME environmental variable found", 0));
+// 		if (chdir(dir) == -1)
+// 		{
+// 			ft_printf("No such file or directory\n");
+// 			return (2);
+// 		}
+// 	}
+// 	else if (chdir(input) == -1)
+// 	{
+// 		ft_printf("No such file or directory\n");
+// 		return (2);
+// 	}
+// 	return (1);
+// }
 
 // Before I found out chdir can do relative commands for me VVV
 

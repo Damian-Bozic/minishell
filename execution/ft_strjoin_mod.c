@@ -1,27 +1,42 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   ft_strjoin_mod.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbozic <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/19 15:02:46 by dbozic            #+#    #+#             */
-/*   Updated: 2024/09/19 15:02:50 by dbozic           ###   ########.fr       */
+/*   Created: 2024/11/26 20:15:20 by dbozic            #+#    #+#             */
+/*   Updated: 2024/11/26 20:15:24 by dbozic           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// This is the main .h file
+#include "execution.h"
 
-#ifndef MINISHELL_H
-# define MINISHELL_H
+char	*ft_strjoin_mod(char *alstr, char *str, size_t s1_n, size_t s2_n)
+{
+	size_t		i;
+	size_t		j;
+	char		*rtn;
 
-# include <readline/readline.h>
-# include <readline/history.h>
-# include "Libft/libft.h"
-# include "db_colours.h"
-# include "execution/execution.h"
-
-int		db_error(char *error_message, int error_code);
-void	*db_nerror(char *error_message);
-
-#endif
+	i = 0;
+	j = 0;
+	rtn = malloc(s1_n + s2_n + 1);
+	if (!rtn)
+		free(alstr);
+	if (!rtn)
+		return (NULL);
+	while (i < s1_n)
+	{
+		rtn[i] = alstr[i];
+		i++;
+	}
+	while (j < s2_n)
+	{
+		rtn[i + j] = str[j];
+		j++;
+	}
+	rtn[i + j] = '\0';
+	free(alstr);
+	alstr = NULL;
+	return (rtn);
+}

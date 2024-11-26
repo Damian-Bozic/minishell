@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "built_in_functions.h"
+#include "execution.h"
 
 static void	ft_unset2(t_envs *envs, t_envs *prev, t_envs *env)
 {
@@ -41,6 +41,8 @@ int	ft_unset(char *var_name, t_envs *envs)
 	t_envs	*env;
 	t_envs	*prev;
 
+	if (!var_name)
+		return(db_error("ft_unset recieved NULL var_name", 0));
 	env = NULL;
 	env = find_in_env_list(var_name, envs);
 	if (!env)

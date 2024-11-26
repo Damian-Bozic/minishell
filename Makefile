@@ -13,9 +13,10 @@
 CC = cc
 FLAGS = -Wall -Wextra -Werror
 MAIN = minishell.c
-SOURCES = $(addprefix built_in_functions/, \
+SOURCES = $(addprefix execution/, \
 		ft_echo.c ft_pwd.c ft_cd.c ft_env.c ft_export.c ft_unset.c ft_env.c \
-		ft_envs_util.c ft_doc_functions.c convert_envs_to_envp.c) \
+		ft_envs_util.c ft_doc_functions.c convert_envs_to_envp.c \
+		ft_strjoin_mod.c filter_argv.c ft_getenv.c) \
 		helper_functions/db_error.c
 OBJECTS = $(SOURCES:%.c=%.o)
 NAME = minishell.a

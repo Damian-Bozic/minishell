@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   built_in_functions.h                               :+:      :+:    :+:   */
+/*   execution.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbozic <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 15:53:55 by dbozic            #+#    #+#             */
-/*   Updated: 2024/09/24 15:53:58 by dbozic           ###   ########.fr       */
+/*   Updated: 2024/11/26 20:09:26 by dbozic           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BUILT_IN_FUNCTIONS_H
-# define BUILT_IN_FUNCTIONS_H
+#ifndef EXECUTION_H
+# define EXECUTION_H
 
 # include "../minishell.h"
 # include <limits.h>
@@ -30,8 +30,8 @@ typedef struct s_envs
 }	t_envs;
 
 int		ft_pwd(void);
-int		ft_echo(int flag, char *input);
-int		ft_cd(char *input);
+int		ft_echo(char **argv, char **envp);
+int		ft_cd(char **argv, char **envp);
 
 t_envs	*init_envs(char **envp, t_envs *head, t_envs *current, t_envs *last);
 int		free_envs(t_envs *envs);
@@ -45,5 +45,9 @@ char	**convert_envs_to_envp(t_envs *envs);
 char	*read_doc(char *filename);
 int		write_doc(char *filename, char *content);
 int		append_doc(char *filename, char *content);
+
+char	*ft_getenv(char *env_name, char **envp);
+char	*filter_argv(char *arg, char **envp);
+char	*ft_strjoin_mod(char *alstr, char *str, size_t s1_n, size_t s2_n);
 
 #endif
