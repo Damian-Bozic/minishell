@@ -179,7 +179,79 @@ int	count_args(char **input)
 	return (i);
 }
 
-int	init_pipex_dir_and_flags(char **input, char ***flags, char **dir, int n)
+// int	init_pipex_dir_and_flags(char **input, char ***flags, char ***dir, int n)
+// {
+// 	int	i;
+// 	int	j;
+// 	int	k;
+
+// 	i = 0;
+// 	k = 0;
+// 	if (n == 0)
+// 		return (0);
+// 	while (input[i])
+// 	{
+// 		dir[k] = ft_strjoin("/cheese/", input[i]);
+// 		if (!dir[k])
+// 			return (db_error("malloc fail in pipex", 0));
+// 		flags[k] = (char **)ft_calloc(count_args(&input[i]) + 1, sizeof(char *));
+// 		if (!flags[k])
+// 			return (db_error("malloc fail in pipex", 0));
+// 		j = 0;
+// 		while (input[i + j] && ft_strcmp("'PIPE", input[i + j]) != 0)
+// 		{
+// 			flags[k][j] = ft_strdup(input[i + j]);
+// 			if (!flags[k][j])
+// 				return (db_error("malloc fail in pipex", 0));
+// 			j++;
+// 		}
+// 		i = i + j + 1;
+// 		k++;
+// 	}
+// 	return (1);
+// }
+
+typedef struct s_pipex
+{
+	char	**input;
+	char	**envp;
+	char	***flags;
+	char	***dir;
+    int		(*fd)[2];
+	int		*pid;
+	int		n_of_cmds;
+}		t_pipex;
+
+int	init_pipex_dir(t_pipex *pipex, char *input, int k)
+{
+	int		i;
+	char	*temp;
+
+	i = 0;
+	temp = ft_getenv("PATH", pipex->envp);
+	if (!temp)
+		return (db_error("init_pipex_dir failed to find $PATH var", 0));
+	pipex->dir[k] = ft_split(temp, ':');
+	if (!pipex->dir[k])
+		return (db_error("malloc fail in pipex", 0));
+	while(pipex->dir[k][i])
+	{
+		temp = ft_strjoin(pipex->dir[k][i], "/");
+		if (!temp)
+			return (db_error("malloc fail in pipex", 0));
+		free(pipex->dir[k][i]);
+		pipex->dir[k][i] = temp;
+		temp = ft_strjoin(pipex->dir[k][i], input);
+		if (!temp)
+			return (db_error("malloc fail in pipex", 0));
+		free(pipex->dir[k][i]);
+		pipex->dir[k][i] = temp;
+		i++;
+	}
+	return (1);
+}
+
+int	init_pipex_dir_and_flags(t_pipex *pipex)
 {
 	int	i;
 	int	j;
@@ -187,21 +259,21 @@ int	init_pipex_dir_and_flags(char **input, char ***flags, char **dir, int n)
 
 	i = 0;
 	k = 0;
-	if (n == 0)
+	if (pipex->n_of_cmds == 0)
 		return (0);
-	while (input[i])
+	while (pipex->input[i])
 	{
-		dir[k] = ft_strjoin("/bin/", input[i]);
-		if (!dir[k])
-			return (db_error("malloc fail in pipex", 0));
-		flags[k] = (char **)ft_calloc(count_args(&input[i]) + 1, sizeof(char *));
-		if (!flags[k])
+		if (!init_pipex_dir(pipex, pipex->input[i], k))
+			return (0);
+		pipex->flags[k] = (char **)ft_calloc(count_args(&pipex->input[i]) + 1, 
+				sizeof(char *));
+		if (!pipex->flags[k])
 			return (db_error("malloc fail in pipex", 0));
 		j = 0;
-		while (input[i + j] && ft_strcmp("'PIPE", input[i + j]) != 0)
+		while (pipex->input[i + j] && ft_strcmp("'PIPE", pipex->input[i + j]) != 0)
 		{
-			flags[k][j] = ft_strdup(input[i + j]);
-			if (!flags[k][j])
+			pipex->flags[k][j] = ft_strdup(pipex->input[i + j]);
+			if (!pipex->flags[k][j])
 				return (db_error("malloc fail in pipex", 0));
 			j++;
 		}
@@ -210,17 +282,6 @@ int	init_pipex_dir_and_flags(char **input, char ***flags, char **dir, int n)
 	}
 	return (1);
 }
-
-typedef struct s_pipex
-{
-	char	**input;
-	char	**envp;
-	char	***flags;
-	char	**dir;
-    int		(*fd)[2];
-	int		*pid;
-	int		n_of_cmds;
-}		t_pipex;
 
 void free_pipex(t_pipex *pipex)
 {
@@ -233,7 +294,7 @@ void free_pipex(t_pipex *pipex)
 	if (pipex->flags)
 		free_ptr_ptr_array(pipex->flags);
 	if (pipex->dir)
-		free_ptr_array(pipex->dir);
+		free_ptr_ptr_array(pipex->dir);
 	if (pipex->fd)
 		free(pipex->fd);
 	if (pipex->pid)
@@ -275,28 +336,29 @@ void exec_addon(t_pipex *pipex, int cmd_no)
 {
 	char	**flags;
 	char	**envp;
-	char	*dir;
+	char	**dir;
+	int		i;
 
+	i = 0;
 	flags = db_dup_arr_of_str(pipex->flags[cmd_no]);
 	envp = db_dup_arr_of_str(pipex->envp);
-	dir = ft_strdup(pipex->dir[cmd_no]);
+	dir = db_dup_arr_of_str(pipex->dir[cmd_no]);
 	free_pipex(pipex);
 	if (!flags || !dir || !envp)
 	{
 		db_nerror("malloc fail in pipex");
 		free_ptr_array(flags);
 		free_ptr_array(envp);
-		if (!dir)
-			free(dir);
+		free_ptr_array(dir);
 		return ;
 	}
-	if (execve(dir, flags, envp) == -1)
-    {
-		free_ptr_array(flags);
-		free_ptr_array(flags);
-		free(dir);
-        db_nerror("execve error in pipex");
-    }
+	while (dir[i] && execve(dir[i], flags, envp) == -1)
+		i++;
+	write(2, flags[0], sizeof(flags[0]));
+	write(2, ": command not found\n", 21);
+	free_ptr_array(flags);
+	free_ptr_array(envp);
+	free_ptr_array(dir);
 }
 
 	// else if (ft_strcmp(dir, "/bin/export"))
@@ -304,15 +366,15 @@ void exec_addon(t_pipex *pipex, int cmd_no)
 	// else if (ft_strcmp(dir, "/bin/unset"))
 	// 	ft_unset(argv[1], envs);
 
-int	exec_builtin(char *dir, char **argv, char **envp, t_envs *envs)
+int	exec_builtin(char **argv, char **envp, t_envs *envs)
 {
-	if (ft_strcmp(dir, "/bin/echo") == 0)
+	if (ft_strcmp(argv[0], "echo") == 0)
 		ft_echo(argv, envp);
-	else if (ft_strcmp(dir, "/bin/cd") == 0)
+	else if (ft_strcmp(argv[0], "cd") == 0)
 		ft_cd(argv, envp);
-	else if (ft_strcmp(dir, "/bin/env") == 0)
+	else if (ft_strcmp(argv[0], "env") == 0)
 		ft_env(envs);
-	else if (ft_strcmp(dir, "/bin/pwd") == 0)
+	else if (ft_strcmp(argv[0], "pwd") == 0)
 		ft_pwd();
 	else
 		return (0);
@@ -336,7 +398,7 @@ int pipex(char **input, char **envp, t_envs *envs)
 	pipex->envp = envp;
 	pipex->n_of_cmds = count_commands(input);
 	pipex->flags = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
-	pipex->dir = (char **)ft_calloc(pipex->n_of_cmds + 1, sizeof(char *));
+	pipex->dir = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
 	pipex->pid = ft_calloc(pipex->n_of_cmds + 1, sizeof(int));
 	pipex->fd = ft_calloc(pipex->n_of_cmds + 1, sizeof(int[2]));
 	if (!pipex->flags || !pipex->dir || !pipex->pid || !pipex->fd)
@@ -344,7 +406,7 @@ int pipex(char **input, char **envp, t_envs *envs)
 		free_pipex(pipex);
 		return (db_error("malloc fail in pipex", 0));
 	}
-	if (!init_pipex_dir_and_flags(input, pipex->flags, pipex->dir, pipex->n_of_cmds))
+	if (!init_pipex_dir_and_flags(pipex))
 	{
 		free_pipex(pipex);
 		return (0);
@@ -383,7 +445,7 @@ int pipex(char **input, char **envp, t_envs *envs)
 				dup2(pipex->fd[i - 1][0], STDIN_FILENO);
 				close(pipex->fd[i - 1][0]);
 			}
-			if (exec_builtin(pipex->dir[i], pipex->flags[i], pipex->envp, envs))
+			if (exec_builtin(pipex->flags[i], pipex->envp, envs))
 			{
 				free_pipex(pipex);
 				return (1);
@@ -407,6 +469,9 @@ int pipex(char **input, char **envp, t_envs *envs)
     return (1);
 }
 
+
+// $PATH /nfs/homes/dbozic/bin:/usr/local/sbin:/usr/local/bin:
+//  /usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 int	main(int argc, char **argv, char **envp)
 {
 	printf("%d, %s, %s\n", argc, argv[0], envp[0]);
@@ -416,16 +481,17 @@ int	main(int argc, char **argv, char **envp)
 	if (!envs)
 		return (0);
 
+	// ft_unset("PATH", envs);
 	char	**input;
 
 	input = (char **)ft_calloc(128, sizeof(char *));
-	input[0] = ft_strdup("env");
+	input[0] = ft_strdup("ejarsd");
 	// input[1] = NULL; // ft_strdup("$HOME/minishell");
 	// input[2] = NULL; // ft_strdup("'PIPE");
 	// input[3] = ft_strdup("cd");
 	input[1] = ft_strdup("'PIPE");
-	input[2] = ft_strdup("wc");
-	input[3] = ft_strdup("-l");
+	input[2] = ft_strdup("export");
+	input[3] = ft_strdup("HELO=world");
 	input[4] = NULL;
 	// input[5] = ft_strdup("'PIPE");
 	// input[6] = ft_strdup("wc");
