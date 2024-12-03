@@ -1,27 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   free_command_list.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: amasiuk <amasiuk@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/19 15:02:46 by dbozic            #+#    #+#             */
-/*   Updated: 2024/12/02 10:21:33 by amasiuk          ###   ########.fr       */
+/*   Created: 2024/12/01 19:05:43 by amasiuk           #+#    #+#             */
+/*   Updated: 2024/12/02 09:09:00 by amasiuk          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// This is the main .h file
+#include "minishell.h"
 
-#ifndef MINISHELL_H
-# define MINISHELL_H
+static void	free_command_node(void *command_list_node)
+{
+	t_command	*cmd;
+	int			i;
 
-# include "Libft/libft.h"
-# include "db_colours.h"
-# include "execution/execution.h"
-# include <readline/history.h>
-# include <readline/readline.h>
+	if (!command_list_node)
+		return ;
+	cmd = (t_command *)command_list_node;
+	i = 0;
+	while (cmd->args[i])
+	{
+		free(cmd->args[i]);
+		i++;
+	}
+	free(cmd->args);
+	free(cmd);
+}
 
-int		db_error(char *error_message, int error_code);
-void	*db_nerror(char *error_message);
-
-#endif
+void	free_command_list(t_list **command_list)
+{
+	if (!command_list)
+		return ;
+	ft_lstclear(command_list, &free_command_node);
+}
