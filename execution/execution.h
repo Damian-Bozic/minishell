@@ -17,6 +17,8 @@
 # include <limits.h>
 # include <sys/stat.h>
 # include <fcntl.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 
 # ifndef PATH_MAX
 #  define PATH_MAX 8192
@@ -28,6 +30,17 @@ typedef struct s_envs
 	char			*contents;
 	struct s_envs	*next;
 }	t_envs;
+
+typedef struct s_pipex
+{
+	char	**input;
+	char	**envp;
+	char	***flags;
+	char	***dir;
+	int		(*fd)[2];
+	int		*pid;
+	int		n_of_cmds;
+}		t_pipex;
 
 int		ft_pwd(void);
 int		ft_echo(char **argv, char **envp);
@@ -41,6 +54,12 @@ int		ft_unset(char *var_name, t_envs *envs);
 int		ft_env(t_envs *envs);
 char	**convert_envs_to_envp(t_envs *envs);
 
+int		pipex(char **input, char **envp, t_envs *envs);
+void	close_all_pipes(t_pipex *pipex);
+void	free_pipex(t_pipex *pipex);
+int		init_pipex_dir_and_flags(t_pipex *pipex, int i, int k);
+int		assign_pipex(t_pipex *pipex, char **argv, char **envp);
+int		exec_pipex(t_pipex *pipex, t_envs *envs);
 
 char	*read_doc(char *filename);
 int		write_doc(char *filename, char *content);

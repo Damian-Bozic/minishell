@@ -12,7 +12,7 @@
 
 #include "execution.h"
 
-void space_between_args(int *flag)
+static void	space_between_args(int *flag)
 {
 	if (*flag == 1)
 	{
@@ -23,7 +23,7 @@ void space_between_args(int *flag)
 		*flag = 2;
 }
 
-void print_env(char *arg, int env_len, char **envp, int *flag)
+static void	print_env(char *arg, int env_len, char **envp, int *flag)
 {
 	int	i;
 
@@ -34,7 +34,7 @@ void print_env(char *arg, int env_len, char **envp, int *flag)
 		{
 			if (envp[i][env_len] == '=')
 			{
-				while(envp[i][env_len])
+				while (envp[i][env_len])
 				{
 					space_between_args(flag);
 					ft_putchar_fd(envp[i][env_len + 1], 1);
@@ -46,7 +46,7 @@ void print_env(char *arg, int env_len, char **envp, int *flag)
 	}
 }
 
-void print_with_args(char *arg, char **envp)
+static void	print_with_args(char *arg, char **envp)
 {
 	int			i;
 	static int	flag = 0;
@@ -59,7 +59,7 @@ void print_with_args(char *arg, char **envp)
 		{
 			env_len = 0;
 			while ((arg[i + env_len + 1]) && arg[i + env_len + 1] != '$'
-					 && arg[i + env_len + 1] != '=')
+				&& arg[i + env_len + 1] != '=')
 				env_len++;
 			print_env(&arg[i + 1], env_len, envp, &flag);
 			i += env_len;
@@ -85,7 +85,7 @@ int	ft_echo(char **argv, char **envp)
 	j = 0;
 	flag = 0;
 	if (!argv || !argv[0])
-		return(db_error("ft_echo recieved NULL argv", 0));
+		return (db_error("ft_echo recieved NULL argv", 0));
 	if (argv[1] && ft_strcmp("-n", argv[1]) == 0)
 	{
 		flag = 1;
@@ -98,17 +98,5 @@ int	ft_echo(char **argv, char **envp)
 	}
 	if (!flag)
 		ft_printf("\n");
-	return 1;
+	return (1);
 }
-
-// int	ft_echo(int flag, char *input)
-// {
-// 	if (flag > 1 || flag < 0)
-// 		return (db_error("ft_echo recieved an invalid flag", 0));
-// 	if (!input)
-// 		return (db_error("ft_echo recieved a NULL input string", 0));
-// 	printf("%s", input);
-// 	if (flag == 0)
-// 		printf("\n");
-// 	return (1);
-// }

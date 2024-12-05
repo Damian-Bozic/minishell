@@ -16,8 +16,9 @@ MAIN = minishell.c
 SOURCES = $(addprefix execution/, \
 		ft_echo.c ft_pwd.c ft_cd.c ft_env.c ft_export.c ft_unset.c ft_env.c \
 		ft_envs_util.c ft_doc_functions.c convert_envs_to_envp.c \
-		ft_strjoin_mod.c filter_argv.c ft_getenv.c) \
-		helper_functions/db_error.c
+		ft_strjoin_mod.c filter_argv.c ft_getenv.c pipex.c exec_pipex.c \
+		init_pipex.c ) \
+		helper_functions/db_error.c helper_functions/freeing_functions.c
 OBJECTS = $(SOURCES:%.c=%.o)
 NAME = minishell.a
 PROGRAM = minishell

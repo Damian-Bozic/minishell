@@ -42,7 +42,7 @@ int	ft_unset(char *var_name, t_envs *envs)
 	t_envs	*prev;
 
 	if (!var_name)
-		return(db_error("ft_unset recieved NULL var_name", 0));
+		return (db_error("ft_unset recieved NULL var_name", 0));
 	env = NULL;
 	env = find_in_env_list(var_name, envs);
 	if (!env)

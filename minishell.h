@@ -21,6 +21,10 @@
 # include "db_colours.h"
 # include "execution/execution.h"
 
+void	free_ptr_ptr_array(char ***array);
+void	free_ptr_array(char **ptr_array);
+char	**db_dup_arr_of_str(char **array);
+
 int		db_error(char *error_message, int error_code);
 void	*db_nerror(char *error_message);
 
