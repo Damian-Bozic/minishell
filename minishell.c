@@ -3,169 +3,82 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbozic <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: amasiuk <amasiuk@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/19 15:02:27 by dbozic            #+#    #+#             */
-/*   Updated: 2024/09/19 15:02:39 by dbozic           ###   ########.fr       */
+/*   Created: 2024/12/05 13:26:54 by amasiuk           #+#    #+#             */
+/*   Updated: 2024/12/05 16:47:46 by amasiuk          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-#include <termios.h>
-#include "signal.h"
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
-static void free_ptr_array(char **ptr_array)
+t_g_state		g_status;
+
+static t_list	*get_command_list(char *input_line, t_data *data)
 {
-    int i;
+	t_list	*tokens_list;
+	t_list	*commands_list;
 
-    i = 0;
-    if (!ptr_array)
-        return ;
-    while (ptr_array[i])
-    {
-        free(ptr_array[i]);
-        i++;
-    }
-    free(ptr_array);
+	if (!input_line)
+	{
+		ft_putendl_fd("exit", STDOUT_FILENO);
+		close_shell(data, g_status.status_code);
+	}
+	// expand_variables(); something to get our ex.variables
+	tokens_list = lexer_analysis(input_line);
+	free(input_line);
+	if (!tokens_list)
+		return (NULL);
+	commands_list = parser_analysis(tokens_list, data);
+	ft_lstclear(&tokens_list, &free_lexer_token_data);
+	return (commands_list);
 }
 
-int pipex(void)
+static t_data	*init_data(char **env)
 {
-    int fd[2];
-    int pid1;
-    int pid2;
-    char    **flags;
+	t_data	*data;
 
-    flags = (char **)ft_calloc(3, sizeof(char *));
-    flags[0] = ft_strdup("ls");
-    flags[1] = ft_strdup("-l");
-
-    if (pipe(fd) == -1)
-        return (db_error("pipex failed to create pipe", 0));
-
-    pid1 = fork();
-    if (pid1 < 0)
-        return (db_error("pipex failed to create fork", 0));
-    if (pid1 == 0)
-    {
-        dup2(fd[1], STDOUT_FILENO); // will make stdout point toward fd[1];
-        close(fd[0]);
-        close(fd[1]);
-        if (execve("/bin/ls", flags, NULL) == -1)
-        {
-            free_ptr_array(flags);
-            return (db_error("execve error", 0));
-        }
-    }
-
-    pid2 = fork(); 
-    if (pid2 < 0)
-        return (db_error("pipex failed to create fork", 0));
-    if (pid2 == 0)
-    {
-        dup2(fd[0], STDIN_FILENO); // will make stdin point toward fd[0];
-        close(fd[0]);
-        close(fd[1]);
-        flags[0] = "wc";
-        if (execve("/bin/wc", flags, NULL) == -1)
-        {
-            free_ptr_array(flags);
-            return (db_error("execve error", 0));
-        }
-    }
-    free_ptr_array(flags);
-    close(fd[0]);
-    close(fd[1]);
-    waitpid(pid1, NULL, 0);
-    waitpid(pid2, NULL, 0);
-    return (1);
+	data = ft_calloc(1, sizeof(t_data));
+	if (!data)
+		return (NULL);
+	// data->env = copy_env(?env); we need copy our current ex.var. 
+	if (!(data->env))
+		return (free(data), NULL);
+	// data->export_env = copy_env(?env); 
+	if (!(data->export_env))
+		return (free(data->env), free(data), NULL);
+	data->stdin_dup = dup(STDIN_FILENO);
+	data->stdout_dup = dup(STDOUT_FILENO);
+	return (data);
 }
 
 int	main(int argc, char **argv, char **envp)
 {
-	printf("%d, %s, %s\n", argc, argv[0], envp[0]);
+	t_data	*data;
+	char	*input;
 
-	pipex();
-
-
-	// char	*str;
-
-	// str = read_doc("test.txt");
-
-	// write_doc("test.txt", "much content\n");
-	// str = read_doc("test.txt");
-	// printf("%s\n", str);
-	// free(str);
-
-	// append_doc("test.txt", "appended stuffs\n");
-	// str = read_doc("test.txt");
-	// printf("%s\n", str);
-	// free(str);
-
-	// write_doc("test.txt", "overwritten contents\n");
-	// str = read_doc("test.txt");
-	// printf("%s\n", str);
-	// free(str);
-
-	// t_envs	*envs;
-	// char	**envp2;
-	// int		i = 0;
-
-	// envs = init_envs(envp, NULL, NULL, NULL);
-	// if (!envs)
-	// 	return (0);
-
-	// ft_export(ft_strdup("CHEESE"), ft_strdup("cheesewow"), envs);
-	// ft_printf("start convert\n");
-	// envp2 = convert_envs_to_envp(envs);
-	// if (!envp2)
-	// 	return(db_error("failed to envp2", 0));
-	// while (envp2[i])
-	// {
-	// 	ft_printf("%s\n", envp2[i]);
-	// 	i++;
-	// }
-	// free_ptr_array(envp2);
-	// free_envs(envs);
-
-	// ft_env(envs);
-	// ft_export(ft_strdup("CHEESE"), ft_strdup("cheesewow"), envs);
-	// ft_export(ft_strdup("CHEESE"), ft_strdup("wow"), envs);
-	// ft_export(ft_strdup("CHEESESSSSS"), ft_strdup("wow"), envs);
-	// ft_env(envs);
-	// printf("\n\n\n");
-	// ft_unset("CHEESE", envs);
-	// ft_env(envs);
-	// printf("\n\n\n");
-	// ft_unset("CHEESE", envs);
-	// ft_unset("CHEESESSSS", envs);
-	// ft_env(envs);
-	// printf("\n\n\n");
-	// ft_export(ft_strdup(""), ft_strdup(""), envs);
-	// ft_env(envs);
-	// printf("\n\n\n");
-	// free_envs(envs);
-
-	// db_error("error check", 0);
-	// ft_pwd();
-	// ft_echo(1, "cat");
-	// ft_echo(0, "meow");
-	// ft_echo(1, "mewo");
-	// ft_echo(0, "meew");
-	// ft_echo(1, "wow");
-	// ft_echo(0, "cheese");
-	// ft_cd("Libft");
-	// ft_pwd();
-	// ft_cd("..");
-	// ft_pwd();
-	// ft_cd("/");
-	// ft_pwd();
-	// ft_cd("");
-	// ft_pwd();
-	// ft_cd("wow");
-	// ft_pwd();
+	(void)argc;
+	(void)argv;
+	data = init_data(envp);
+	if (!data)
+		return (255); //can be also 0, no pronlem
+	while (42)
+	{
+		set_interactive_signals();
+		input = readline("MiniShell% > ");
+		add_history(input);
+		set_non_interactive_signals();
+		data->command_list = get_command_list(input, data);
+		if (!data->command_list)
+			continue ;
+		/* if (ft_lstsize(data->command_list) == 1)
+			g_status.status_code = execute_input(data, data->command_list);
+		else if (ft_lstsize(data->command_list) > 1)
+			g_status.status_code = execute_with_pipe(data);
+        
+        this is how i'm seing that, but it's okay to change it
+            */
+		free_command_list(&(data->command_list));
+	}
+	return (EXIT_SUCCESS);
 }
