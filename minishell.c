@@ -21,7 +21,7 @@
 static void free_ptr_ptr_array(char ***array)
 {
     int i;
-	int	j;
+	int				j;
 
     i = 0;
     if (!array)
@@ -115,9 +115,10 @@ char **db_dup_arr_of_str(char **array)
 //  use of cd wouldnt work, its errors wouldnt be sent through a pipe.
 //
 // Pipes
-//	between each command there should be a pipe, otherwise pipex will
-//   close without executing and will print an error.
+//	between each command there should be a pipe
 //  pipes are recognised with the token "'PIPE"
+//  commands are recognised as the first argument in argv and any
+//   argument after a pipe.
 //
 // a complete input for pipex would look something like:
 //  "ls"		CMD
@@ -137,13 +138,11 @@ char **db_dup_arr_of_str(char **array)
 // pipex will free both char **input and char **envp.
 //
 
-int count_commands(char **input)
+int count_commands(char **input, int i)
 {
-	int	i;
 	int	j;
 	int	flag;
 
-	i = 0;
 	j = 0;
 	flag = 0;
 	while (input[j])
@@ -251,14 +250,10 @@ int	init_pipex_dir(t_pipex *pipex, char *input, int k)
 	return (1);
 }
 
-int	init_pipex_dir_and_flags(t_pipex *pipex)
+int	init_pipex_dir_and_flags(t_pipex *pipex, int i, int k)
 {
-	int	i;
 	int	j;
-	int	k;
 
-	i = 0;
-	k = 0;
 	if (pipex->n_of_cmds == 0)
 		return (0);
 	while (pipex->input[i])
@@ -307,10 +302,8 @@ void close_all_pipes(t_pipex *pipex)
 	int	i;
 
 	i = 0;
-	// printf("closed pipes called\n");
 	while (i < pipex->n_of_cmds)
 	{
-		// ft_printf("closed a pipe\n");
 		close(pipex->fd[i][0]);
 		close(pipex->fd[i][1]);
 		i++;
@@ -366,6 +359,8 @@ void exec_addon(t_pipex *pipex, int cmd_no)
 	// else if (ft_strcmp(dir, "/bin/unset"))
 	// 	ft_unset(argv[1], envs);
 
+//check if export or unset do anything
+
 int	exec_builtin(char **argv, char **envp, t_envs *envs)
 {
 	if (ft_strcmp(argv[0], "echo") == 0)
@@ -376,27 +371,26 @@ int	exec_builtin(char **argv, char **envp, t_envs *envs)
 		ft_env(envs);
 	else if (ft_strcmp(argv[0], "pwd") == 0)
 		ft_pwd();
+	else if (ft_strcmp(argv[0], "export") == 0 || ft_strcmp(argv[0], "unset") == 0)
+	{
+
+	}
 	else
 		return (0);
 	return (1);
 }
 
-int pipex(char **input, char **envp, t_envs *envs)
+int	assign_pipex(t_pipex *pipex, char **argv, char **envp)
 {
-	t_pipex	*pipex;
-	int		i;
-
-	i = 0;
-	pipex = malloc(sizeof(t_pipex));
 	if (!pipex)
 	{
-		free_ptr_array(input);
+		free_ptr_array(argv);
 		free_ptr_array(envp);
 		return (db_error("malloc fail in pipex", 0));
 	}
-	pipex->input = input;
+	pipex->input = argv;
 	pipex->envp = envp;
-	pipex->n_of_cmds = count_commands(input);
+	pipex->n_of_cmds = count_commands(argv, 0);
 	pipex->flags = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
 	pipex->dir = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
 	pipex->pid = ft_calloc(pipex->n_of_cmds + 1, sizeof(int));
@@ -406,25 +400,47 @@ int pipex(char **input, char **envp, t_envs *envs)
 		free_pipex(pipex);
 		return (db_error("malloc fail in pipex", 0));
 	}
-	if (!init_pipex_dir_and_flags(pipex))
+	if (!init_pipex_dir_and_flags(pipex, 0, 0))
 	{
 		free_pipex(pipex);
 		return (0);
 	}
+	return (1);
+}
 
-	// make sure to check for errors and free below here is not checked!
-	while (i < pipex->n_of_cmds - 1)
+int	exec_pipex_handle_pipes(t_pipex *pipex, int i)
+{
+	close_all_unused_pipes(pipex, i, i - 1);
+	if (i != pipex->n_of_cmds - 1)
 	{
-		// printf("made pipe %d\n", i);
-		if (pipe(pipex->fd[i]) == -1)
-			return (db_error("pipex failed to create a pipe", 0));
-		i++;
+		if (dup2(pipex->fd[i][1], STDOUT_FILENO) == -1)
+		{
+			close_all_pipes(pipex);
+			free_pipex(pipex);
+			return (0);
+		}
+		close(pipex->fd[i][1]);
 	}
+	if (i != 0)
+	{
+		if (dup2(pipex->fd[i - 1][0], STDIN_FILENO) == -1)
+		{
+			close_all_pipes(pipex);
+			free_pipex(pipex);
+			return (0);
+		}
+		close(pipex->fd[i - 1][0]);
+	}
+	return (1);
+}
+
+int	exec_pipex(t_pipex *pipex, t_envs *envs)
+{
+	int	i;
+
 	i = 0;
-	// ft_printf("amount of cmds %d\n", pipex->n_of_cmds);
 	while (i < pipex->n_of_cmds)
 	{
-		// ft_printf("making fork %d\n", i);
 		pipex->pid[i] = fork();
 		if (pipex->pid[i] < 0)
 		{
@@ -434,17 +450,8 @@ int pipex(char **input, char **envp, t_envs *envs)
 		}
 		if (pipex->pid[i] == 0)
 		{
-			close_all_unused_pipes(pipex, i, i - 1);
-			if (i != pipex->n_of_cmds - 1)
-			{
-				dup2(pipex->fd[i][1], STDOUT_FILENO);
-				close(pipex->fd[i][1]);
-			}
-			if (i != 0)
-			{
-				dup2(pipex->fd[i - 1][0], STDIN_FILENO);
-				close(pipex->fd[i - 1][0]);
-			}
+			if (!exec_pipex_handle_pipes(pipex, i))
+				return (0);
 			if (exec_builtin(pipex->flags[i], pipex->envp, envs))
 			{
 				free_pipex(pipex);
@@ -456,13 +463,45 @@ int pipex(char **input, char **envp, t_envs *envs)
 		}
 		i++;
 	}
-	// ft_printf("closing main pipes\n");
+	return (1);
+}
+
+int	check_pipes(t_pipex *pipex)
+{
+	int	i;
+
+	i = 0;
+	while (i < pipex->n_of_cmds - 1)
+	{
+		if (pipe(pipex->fd[i]) == -1)
+		{
+			close_all_pipes(pipex);
+			free_pipex(pipex);
+			return (db_error("pipex failed to create a pipe", 0));
+		}
+		i++;
+	}
+	return (1);
+}
+
+int pipex(char **input, char **envp, t_envs *envs)
+{
+	t_pipex	*pipex;
+	int		i;
+
+	i = 0;
+	pipex = malloc(sizeof(t_pipex));
+	if (!assign_pipex(pipex, input, envp))
+		return (0);
+	if (!check_pipes(pipex))
+		return (0);
+	if (!exec_pipex(pipex, envs))
+		return (0);
 	close_all_pipes(pipex);
 	i = 0;
 	while (i < pipex->n_of_cmds)
 	{
 		waitpid(pipex->pid[i], NULL, 0);
-		// ft_printf("main found pid %d finished\n", i);
 		i++;
 	}
 	free_pipex(pipex);
@@ -485,14 +524,15 @@ int	main(int argc, char **argv, char **envp)
 	char	**input;
 
 	input = (char **)ft_calloc(128, sizeof(char *));
-	input[0] = ft_strdup("ejarsd");
-	// input[1] = NULL; // ft_strdup("$HOME/minishell");
-	// input[2] = NULL; // ft_strdup("'PIPE");
-	// input[3] = ft_strdup("cd");
-	input[1] = ft_strdup("'PIPE");
-	input[2] = ft_strdup("export");
-	input[3] = ft_strdup("HELO=world");
-	input[4] = NULL;
+	input[0] = ft_strdup("ls");
+	input[1] = ft_strdup("-l");
+	input[2] = ft_strdup("'PIPE");
+	input[3] = ft_strdup("wc");
+	// input[1] = ft_strdup("'PIPE");
+	// input[2] = ft_strdup("wc");
+	// input[3] = ft_strdup("-l");
+	input[4] = NULL; //ft_strdup("-l"); //NULL;
+	input[5] = NULL;
 	// input[5] = ft_strdup("'PIPE");
 	// input[6] = ft_strdup("wc");
 	// input[7] = ft_strdup("-c");
@@ -643,5 +683,209 @@ int	main(int argc, char **argv, char **envp)
 //     waitpid(pid1, NULL, 0);
 //     waitpid(pid2, NULL, 0);
 // 	free_ptr_array(envp);
+//     return (1);
+// }
+
+
+// int pipex(char **input, char **envp, t_envs *envs)
+// {
+// 	t_pipex	*pipex;
+// 	int		i;
+
+// 	i = 0;
+// 	pipex = malloc(sizeof(t_pipex));
+// 	if (!pipex)
+// 	{
+// 		free_ptr_array(input);
+// 		free_ptr_array(envp);
+// 		return (db_error("malloc fail in pipex", 0));
+// 	}
+// 	pipex->input = input;
+// 	pipex->envp = envp;
+// 	pipex->n_of_cmds = count_commands(input, 0);
+// 	pipex->flags = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
+// 	pipex->dir = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
+// 	pipex->pid = ft_calloc(pipex->n_of_cmds + 1, sizeof(int));
+// 	pipex->fd = ft_calloc(pipex->n_of_cmds + 1, sizeof(int[2]));
+// 	if (!pipex->flags || !pipex->dir || !pipex->pid || !pipex->fd)
+// 	{
+// 		free_pipex(pipex);
+// 		return (db_error("malloc fail in pipex", 0));
+// 	}
+// 	if (!init_pipex_dir_and_flags(pipex, 0, 0))
+// 	{
+// 		free_pipex(pipex);
+// 		return (0);
+// 	}
+
+// 	// make sure to check for errors and free below here is not checked!
+// 	while (i < pipex->n_of_cmds - 1)
+// 	{
+// 		// printf("made pipe %d\n", i);
+// 		if (pipe(pipex->fd[i]) == -1)
+// 		{
+// 			close_all_pipes(pipex);
+// 			free_pipex(pipex);
+// 			return (db_error("pipex failed to create a pipe", 0));
+// 		}
+// 		i++;
+// 	}
+// 	i = 0;
+// 	// ft_printf("amount of cmds %d\n", pipex->n_of_cmds);
+// 	while (i < pipex->n_of_cmds)
+// 	{
+// 		// ft_printf("making fork %d\n", i);
+// 		pipex->pid[i] = fork();
+// 		if (pipex->pid[i] < 0)
+// 		{
+// 			close_all_pipes(pipex);
+// 			free_pipex(pipex);
+// 			return (db_error("pipex failed to create fork", 0));
+// 		}
+// 		if (pipex->pid[i] == 0)
+// 		{
+// 			close_all_unused_pipes(pipex, i, i - 1);
+// 			if (i != pipex->n_of_cmds - 1)
+// 			{
+// 				//check for write to file > >>
+// 				dup2(pipex->fd[i][1], STDOUT_FILENO);
+// 				close(pipex->fd[i][1]);
+// 			}
+// 			if (i != 0)
+// 			{
+// 				//check for read from file <
+// 				// if (check_for_redirection(pipex, i))
+// 				// {
+// 				// 	//execute redirection
+// 				// }
+// 				dup2(pipex->fd[i - 1][0], STDIN_FILENO);
+// 				close(pipex->fd[i - 1][0]);
+// 			}
+// 			if (exec_builtin(pipex->flags[i], pipex->envp, envs))
+// 			{
+// 				free_pipex(pipex);
+// 				return (1);
+// 			}
+// 			else
+// 				exec_addon(pipex, i);
+// 			return (0);
+// 		}
+// 		i++;
+// 	}
+// 	// ft_printf("closing main pipes\n");
+// 	close_all_pipes(pipex);
+// 	i = 0;
+// 	while (i < pipex->n_of_cmds)
+// 	{
+// 		waitpid(pipex->pid[i], NULL, 0);
+// 		// ft_printf("main found pid %d finished\n", i);
+// 		i++;
+// 	}
+// 	free_pipex(pipex);
+//     return (1);
+// }
+
+// int	assign_pipex(t_pipex *pipex, char **argv, char **envp)
+// {
+// 	if (!pipex)
+// 	{
+// 		free_ptr_array(argv);
+// 		free_ptr_array(envp);
+// 		return (db_error("malloc fail in pipex", 0));
+// 	}
+// 	pipex->input = argv;
+// 	pipex->envp = envp;
+// 	pipex->n_of_cmds = count_commands(argv, 0);
+// 	pipex->flags = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
+// 	pipex->dir = (char ***)ft_calloc(pipex->n_of_cmds + 1, sizeof(char **));
+// 	pipex->pid = ft_calloc(pipex->n_of_cmds + 1, sizeof(int));
+// 	pipex->fd = ft_calloc(pipex->n_of_cmds + 1, sizeof(int[2]));
+// 	if (!pipex->flags || !pipex->dir || !pipex->pid || !pipex->fd)
+// 	{
+// 		free_pipex(pipex);
+// 		return (db_error("malloc fail in pipex", 0));
+// 	}
+// 	if (!init_pipex_dir_and_flags(pipex, 0, 0))
+// 	{
+// 		free_pipex(pipex);
+// 		return (0);
+// 	}
+// 	return (1);
+// }
+
+// int pipex(char **input, char **envp, t_envs *envs)
+// {
+// 	t_pipex	*pipex;
+// 	int		i;
+
+// 	i = 0;
+// 	pipex = malloc(sizeof(t_pipex));
+// 	if (!assign_pipex(pipex, input, envp))
+// 		return (0);
+
+// 	// make sure to check for errors and free below here is not checked!
+// 	while (i < pipex->n_of_cmds - 1)
+// 	{
+// 		// printf("made pipe %d\n", i);
+// 		if (pipe(pipex->fd[i]) == -1)
+// 		{
+// 			close_all_pipes(pipex);
+// 			free_pipex(pipex);
+// 			return (db_error("pipex failed to create a pipe", 0));
+// 		}
+// 		i++;
+// 	}
+// 	i = 0;
+// 	// ft_printf("amount of cmds %d\n", pipex->n_of_cmds);
+// 	while (i < pipex->n_of_cmds)
+// 	{
+// 		// ft_printf("making fork %d\n", i);
+// 		pipex->pid[i] = fork();
+// 		if (pipex->pid[i] < 0)
+// 		{
+// 			close_all_pipes(pipex);
+// 			free_pipex(pipex);
+// 			return (db_error("pipex failed to create fork", 0));
+// 		}
+// 		if (pipex->pid[i] == 0)
+// 		{
+// 			close_all_unused_pipes(pipex, i, i - 1);
+// 			if (i != pipex->n_of_cmds - 1)
+// 			{
+// 				//check for write to file > >>
+// 				dup2(pipex->fd[i][1], STDOUT_FILENO);
+// 				close(pipex->fd[i][1]);
+// 			}
+// 			if (i != 0)
+// 			{
+// 				//check for read from file <
+// 				// if (check_for_redirection(pipex, i))
+// 				// {
+// 				// 	//execute redirection
+// 				// }
+// 				dup2(pipex->fd[i - 1][0], STDIN_FILENO);
+// 				close(pipex->fd[i - 1][0]);
+// 			}
+// 			if (exec_builtin(pipex->flags[i], pipex->envp, envs))
+// 			{
+// 				free_pipex(pipex);
+// 				return (1);
+// 			}
+// 			else
+// 				exec_addon(pipex, i);
+// 			return (0);
+// 		}
+// 		i++;
+// 	}
+// 	// ft_printf("closing main pipes\n");
+// 	close_all_pipes(pipex);
+// 	i = 0;
+// 	while (i < pipex->n_of_cmds)
+// 	{
+// 		waitpid(pipex->pid[i], NULL, 0);
+// 		// ft_printf("main found pid %d finished\n", i);
+// 		i++;
+// 	}
+// 	free_pipex(pipex);
 //     return (1);
 // }
