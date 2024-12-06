@@ -20,6 +20,7 @@
 # include "Libft/libft.h"
 # include "db_colours.h"
 # include "execution/execution.h"
+# include "lexer_parser/lexer_parser.h"
 
 void	free_ptr_ptr_array(char ***array);
 void	free_ptr_array(char **ptr_array);

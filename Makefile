@@ -18,6 +18,9 @@ SOURCES = $(addprefix execution/, \
 		ft_envs_util.c ft_doc_functions.c convert_envs_to_envp.c \
 		ft_strjoin_mod.c filter_argv.c ft_getenv.c pipex.c exec_pipex.c \
 		init_pipex.c ) \
+		$(addprefix lexer_parser/, \
+		free_command_list.c heredoc.c lexer_states.c parser_actions.c \
+		parser_analizer.c parser_states.c signals.c token_actions.c ) \
 		helper_functions/db_error.c helper_functions/freeing_functions.c
 OBJECTS = $(SOURCES:%.c=%.o)
 NAME = minishell.a
