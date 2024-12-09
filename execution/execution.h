@@ -24,12 +24,7 @@
 #  define PATH_MAX 8192
 # endif
 
-typedef struct s_envs
-{
-	char			*name;
-	char			*contents;
-	struct s_envs	*next;
-}	t_envs;
+
 
 typedef struct s_pipex
 {

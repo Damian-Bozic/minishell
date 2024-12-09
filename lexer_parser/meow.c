@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <readline/history.h>
+/* #include <readline/history.h>
 #include <readline/readline.h>
 #include <signal.h>
 #include <stdio.h>
@@ -272,3 +272,4 @@ int	main(void)
 	}
 	return (0);
 }
+ */

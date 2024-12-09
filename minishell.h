@@ -19,6 +19,28 @@
 # include <readline/history.h>
 # include "Libft/libft.h"
 # include "db_colours.h"
+
+/*
+ * Data structure for the shell environment.
+ * Contains environment variables and command list, among other things.
+ */
+
+typedef struct s_envs
+{
+	char			*name;
+	char			*contents;
+	struct s_envs	*next;
+}	t_envs;
+
+typedef struct s_data
+{
+	char **env;           /* Environment variables */
+	t_list *command_list; /* List of commands */
+	t_envs *envs;
+	int stdin_dup;        /* Duplicated standard input file descriptor */
+	int stdout_dup;       /* Duplicated standard output file descriptor */
+}		t_data;
+
 # include "execution/execution.h"
 # include "lexer_parser/lexer_parser.h"
 

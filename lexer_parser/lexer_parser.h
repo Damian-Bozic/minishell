@@ -97,19 +97,6 @@ typedef struct s_command
 	int out_fileno; /* Output file descriptor */
 }		t_command;
 
-/*
- * Data structure for the shell environment.
- * Contains environment variables and command list, among other things.
- */
-typedef struct s_data
-{
-	char **env;           /* Environment variables */
-	t_list *command_list; /* List of commands */
-	char **export_env;    /* Exported environment variables */
-	int stdin_dup;        /* Duplicated standard input file descriptor */
-	int stdout_dup;       /* Duplicated standard output file descriptor */
-}		t_data;
-
 /* =============================== LEXER FUNCTIONS =============================== */
 
 /*
@@ -216,5 +203,8 @@ void	free_command_list(t_list **command_list);
  * Creates a heredoc for a command based on token value.
  */
 t_error	create_heredoc(t_list *cmd_list, char *token_value, t_data *data);
+
+void	set_non_interactive_signals(void);
+void	set_interactive_signals(void);
 
 #endif

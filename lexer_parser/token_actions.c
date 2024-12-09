@@ -46,10 +46,12 @@ t_list	*new_lexer_token(t_token token_type, char *value)
 {
 	t_token_data	*new;
 
+	printf("new_lexer_token %d\n", token_type);
 	new = ft_calloc(1, sizeof(t_token_data));
 	new->token = token_type;
 	new->name = ft_strdup("");
 	new->value = value;
+	printf("finished_new_lexer_token\n");
 	return (ft_lstnew(new));
 }
 
