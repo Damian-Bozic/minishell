@@ -12,6 +12,41 @@
 
 #include "minishell.h"
 
+// int	isinset(char c)
+// {
+// 	if
+// }
+
+// void replace_env_recur(char **str, t_envs *envs)
+// {
+// 	int		i;
+// 	int		j;
+// 	char	*str2;
+
+// 	i = 0;
+// 	j = 0;
+// 	while(*str[i] && *str[i] != '$')
+// 		i++;
+// 	if (isinset(*str[i]))
+// 	{
+// 		while(*str[i + j])
+// 	}
+// }
+
+// char *replace_envs_in_str(char *str, t_envs *envs)
+// {
+// 	char *rtn;
+// 	int i;
+// 	int	j;
+
+// 	i = 0;
+// 	j = 0;
+// 	while (str[i] )
+// 	{
+
+// 	}
+// }
+
 // t_g_state		g_status;
 
 void	close_shell(t_data *data)
@@ -34,6 +69,7 @@ static t_list	*get_command_list(char *input_line, t_data *data)
 		close_shell(data);
 	}
 	// expand_variables(); something to get our ex.variables
+	// data->env = convert_envs_to_envp(data->envs);
 	tokens_list = lexer_analysis(input_line);
 	free(input_line);
 	if (!tokens_list)
@@ -100,11 +136,29 @@ int	main(int argc, char **argv, char **envp)
 		if (!data->command_list)
 			continue ;
 
-		ft_printf("Valid command list found\n");
+		ft_printf("Valid command list found\n\n");
 		// translate
 
-		// execute
+		int	i = 0;
+		t_list *cur;
+		t_command *command;	
+		cur = data->command_list;
+		while (cur)
+		{
+			printf("START OF NODE\n");
+			command = (t_command *)cur->content;
+			i = 0;
+			// pipex(command->args, convert_envs_to_envp(data->envs), data->envs);
+			while (command->args[i])
+			{
+				printf("%s\n", command->args[i]);
+				i++;
+			}
+			printf("END OF NODE\n");
+			cur = cur->next;
+		}
 
+		// execute
 		/* if (ft_lstsize(data->command_list) == 1)
 			g_status.status_code = execute_input(data, data->command_list);
 		else if (ft_lstsize(data->command_list) > 1)
@@ -112,6 +166,7 @@ int	main(int argc, char **argv, char **envp)
         
         this is how i'm seing that, but it's okay to change it
             */
+		ft_printf("\n");
 		free_command_list(&(data->command_list));
 	}
 	return (EXIT_SUCCESS);

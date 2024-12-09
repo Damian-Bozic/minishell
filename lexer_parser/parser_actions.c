@@ -16,6 +16,7 @@ t_error	set_stdin(t_list *cmd_list, char *fname)
 {
 	t_command	*cmd;
 
+	printf("file in found final: %s\n", fname);
 	cmd = (t_command *)ft_lstlast(cmd_list)->content;
 	cmd->in_fileno = open(fname, O_RDONLY);
 	if (cmd->in_fileno == -1)
@@ -29,6 +30,8 @@ t_error	set_stdout(t_list *cmd_list, char *fname, bool is_append)
 	int			permissions;
 	int			mode;
 
+	//check for $args
+	printf("file out found final: %s\n", fname);
 	cmd = (t_command *)ft_lstlast(cmd_list)->content;
 	permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 	mode = O_WRONLY | O_CREAT | O_TRUNC;

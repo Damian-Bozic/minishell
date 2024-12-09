@@ -16,6 +16,8 @@
 // returns 1 on success
 // returns 2 on invalid directory change
 
+//missing $args
+
 int	ft_cd(char **argv, char **envp)
 {
 	char	*dir;
