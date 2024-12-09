@@ -12,7 +12,7 @@
 
 #include "execution.h"
 
-static char	*filter_argv3(char *rtn, char *env, int *i, int j)
+static char	*replace_envs3(char *rtn, char *env, int *i, int j)
 {
 	char	*rest;
 
@@ -41,7 +41,7 @@ static char	*filter_argv3(char *rtn, char *env, int *i, int j)
 	return (rtn);
 }
 
-static char	*filter_argv2(char *rtn, char **envp, int *i, int j)
+static char	*replace_envs2(char *rtn, char **envp, int *i, int j)
 {
 	char	*env;
 	char	*temp;
@@ -55,10 +55,10 @@ static char	*filter_argv2(char *rtn, char **envp, int *i, int j)
 	ft_strlcpy(temp, &rtn[*i + 1], j + 1);
 	env = ft_getenv(temp, envp);
 	free(temp);
-	return (filter_argv3(rtn, env, i, j));
+	return (replace_envs3(rtn, env, i, j));
 }
 
-char	*filter_argv(char *arg, char **envp)
+char	*replace_envs(char *arg, char **envp)
 {
 	int		i;
 	int		j;
@@ -67,7 +67,7 @@ char	*filter_argv(char *arg, char **envp)
 	i = 0;
 	rtn = ft_strdup(arg);
 	if (!rtn)
-		return (db_nerror("malloc fail in filter_argv"));
+		return (db_nerror("malloc fail in replace_envs"));
 	while (rtn[i])
 	{
 		if (rtn[i] == '$')
@@ -76,9 +76,9 @@ char	*filter_argv(char *arg, char **envp)
 			while ((rtn[i + j + 1]) && rtn[i + j + 1] != '$'
 				&& rtn[i + j + 1] != '/')
 				j++;
-			rtn = filter_argv2(rtn, envp, &i, j);
+			rtn = replace_envs2(rtn, envp, &i, j);
 			if (!rtn)
-				return (db_nerror("malloc fail in filter_argv"));
+				return (db_nerror("malloc fail in replace_envs"));
 			printf("rtn = %s\n", rtn);
 		}
 		i++;

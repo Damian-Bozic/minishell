@@ -30,7 +30,6 @@ t_error	set_stdout(t_list *cmd_list, char *fname, bool is_append)
 	int			permissions;
 	int			mode;
 
-	//check for $args
 	printf("file out found final: %s\n", fname);
 	cmd = (t_command *)ft_lstlast(cmd_list)->content;
 	permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;

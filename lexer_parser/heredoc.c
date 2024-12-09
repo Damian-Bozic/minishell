@@ -20,7 +20,7 @@ static void	read_heredoc(int fd, char *token_value, t_data *data)
 
 	while (1)
 	{
-		line = readline("> ");
+		line = readline("heredoc> ");
 		if (!line)
 			break ;
 		//expand_variables(&line, data, true);

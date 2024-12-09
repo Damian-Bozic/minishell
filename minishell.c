@@ -12,41 +12,6 @@
 
 #include "minishell.h"
 
-// int	isinset(char c)
-// {
-// 	if
-// }
-
-// void replace_env_recur(char **str, t_envs *envs)
-// {
-// 	int		i;
-// 	int		j;
-// 	char	*str2;
-
-// 	i = 0;
-// 	j = 0;
-// 	while(*str[i] && *str[i] != '$')
-// 		i++;
-// 	if (isinset(*str[i]))
-// 	{
-// 		while(*str[i + j])
-// 	}
-// }
-
-// char *replace_envs_in_str(char *str, t_envs *envs)
-// {
-// 	char *rtn;
-// 	int i;
-// 	int	j;
-
-// 	i = 0;
-// 	j = 0;
-// 	while (str[i] )
-// 	{
-
-// 	}
-// }
-
 // t_g_state		g_status;
 
 void	close_shell(t_data *data)
@@ -61,6 +26,7 @@ static t_list	*get_command_list(char *input_line, t_data *data)
 {
 	t_list	*tokens_list;
 	t_list	*commands_list;
+	char	*buffer;
 
 	ft_printf("get command list start\n");
 	if (!input_line)
@@ -68,10 +34,19 @@ static t_list	*get_command_list(char *input_line, t_data *data)
 		ft_putendl_fd("exit", STDOUT_FILENO);
 		close_shell(data);
 	}
+	ft_printf("input line: %s\n", input_line);
+	buffer = replace_envs(input_line, convert_envs_to_envp(data->envs));
+	ft_printf("buffer line: %s\n", buffer);
+	if (!buffer)
+	{
+		ft_putendl_fd("exit", STDOUT_FILENO);
+		close_shell(data);		
+	}
 	// expand_variables(); something to get our ex.variables
 	// data->env = convert_envs_to_envp(data->envs);
-	tokens_list = lexer_analysis(input_line);
+	tokens_list = lexer_analysis(buffer);
 	free(input_line);
+	free(buffer);
 	if (!tokens_list)
 		return (NULL);
 	commands_list = parser_analysis(tokens_list, data);
@@ -96,21 +71,6 @@ static t_data	*init_data(char **env)
 	data->stdout_dup = dup(STDOUT_FILENO);
 	return (data);
 }
-
-// int	main(void)
-// {
-// 	int i;
-
-// 	i = 0;
-// 	while (i < 10)
-// 	{
-// 		printf("+\n");
-// 		i++;
-// 		if (i == 5)
-// 			continue;
-// 		printf("%d\n", i);
-// 	}
-// }
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -154,6 +114,7 @@ int	main(int argc, char **argv, char **envp)
 				printf("%s\n", command->args[i]);
 				i++;
 			}
+
 			printf("END OF NODE\n");
 			cur = cur->next;
 		}
@@ -172,23 +133,18 @@ int	main(int argc, char **argv, char **envp)
 	return (EXIT_SUCCESS);
 }
 
+// int test(const char *s)
+// {
+// 	int	i;
 
-
-
-
-
-int test(const char *s)
-{
-	int	i;
-
-	i = 0;
-	while (*s != '\0')
-	{
-		s++;
-		i++;
-	}
-	return (i);
-}
+// 	i = 0;
+// 	while (*s != '\0')
+// 	{
+// 		s++;
+// 		i++;
+// 	}
+// 	return (i);
+// }
 
 // int main(void)
 // {
@@ -199,4 +155,36 @@ int test(const char *s)
 
 // 	ft_print("str = %d\n", test("hello"));
 // 	return (1);
+// }
+
+
+// int	main(int argc, char **argv, char **envp)
+// {
+// 	printf("%d, %s, %s\n", argc, argv[0], envp[0]);
+
+// 	t_envs *envs;
+// 	envs = init_envs(envp, NULL, NULL, NULL);
+// 	if (!envs)
+// 		return (0);
+
+// 	// ft_unset("PATH", envs);
+// 	char	**input;
+
+// 	input = (char **)ft_calloc(128, sizeof(char *));
+// 	input[0] = ft_strdup("wc");
+// 	input[1] = ft_strdup("/nfs/homes/dbozic/minishell/test.txt");
+// 	input[2] = ft_strdup("'PIPE");
+// 	input[3] = ft_strdup("cat");
+// 	// input[1] = ft_strdup("'PIPE");
+// 	// input[2] = ft_strdup("wc");
+// 	// input[3] = ft_strdup("-l");
+// 	input[4] = NULL; //ft_strdup("-l"); //NULL;
+// 	input[5] = NULL;
+// 	// input[5] = ft_strdup("'PIPE");
+// 	// input[6] = ft_strdup("wc");
+// 	// input[7] = ft_strdup("-c");
+// 	input[8] = NULL;
+
+// 	pipex(input, convert_envs_to_envp(envs), envs);
+// 	free_envs(envs);
 // }

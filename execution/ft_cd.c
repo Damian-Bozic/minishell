@@ -33,7 +33,7 @@ int	ft_cd(char **argv, char **envp)
 			return (db_error("ft_cd failed to find a $HOME directory", 0));
 		return (1);
 	}
-	dir = filter_argv(argv[1], envp);
+	dir = replace_envs(argv[1], envp);
 	if (!dir)
 		return (db_error("malloc fail in ft_cd", 0));
 	if (chdir(dir) == -1)

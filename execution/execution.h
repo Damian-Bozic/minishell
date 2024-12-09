@@ -61,7 +61,7 @@ int		write_doc(char *filename, char *content);
 int		append_doc(char *filename, char *content);
 
 char	*ft_getenv(char *env_name, char **envp);
-char	*filter_argv(char *arg, char **envp);
+char	*replace_envs(char *arg, char **envp);
 char	*ft_strjoin_mod(char *alstr, char *str, size_t s1_n, size_t s2_n);
 
 #endif

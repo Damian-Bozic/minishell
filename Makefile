@@ -16,7 +16,7 @@ MAIN = minishell.c
 SOURCES = $(addprefix execution/, \
 		ft_echo.c ft_pwd.c ft_cd.c ft_env.c ft_export.c ft_unset.c ft_env.c \
 		ft_envs_util.c ft_doc_functions.c convert_envs_to_envp.c \
-		ft_strjoin_mod.c filter_argv.c ft_getenv.c pipex.c exec_pipex.c \
+		ft_strjoin_mod.c replace_envs.c ft_getenv.c pipex.c exec_pipex.c \
 		init_pipex.c ) \
 		$(addprefix lexer_parser/, \
 		free_command_list.c heredoc.c lexer_states.c parser_actions.c \

@@ -32,10 +32,10 @@ int	main(int argc, char **argv, char **envp)
 	char	**input;
 
 	input = (char **)ft_calloc(128, sizeof(char *));
-	input[0] = ft_strdup("ls");
-	input[1] = ft_strdup("-l");
+	input[0] = ft_strdup("wc");
+	input[1] = ft_strdup("/nfs/homes/dbozic/minishell/test.txt");
 	input[2] = ft_strdup("'PIPE");
-	input[3] = ft_strdup("wc");
+	input[3] = ft_strdup("cat");
 	// input[1] = ft_strdup("'PIPE");
 	// input[2] = ft_strdup("wc");
 	// input[3] = ft_strdup("-l");
