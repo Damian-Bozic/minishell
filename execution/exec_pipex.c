@@ -44,7 +44,7 @@ static void	exec_addon(t_pipex *pipex, int cmd_no)
 static int	exec_builtin(char **argv, char **envp, t_envs *envs)
 {
 	if (ft_strcmp(argv[0], "echo") == 0)
-		ft_echo(argv, envp);
+		ft_echo(argv);
 	else if (ft_strcmp(argv[0], "cd") == 0)
 		ft_cd(argv, envp);
 	else if (ft_strcmp(argv[0], "env") == 0)

@@ -46,21 +46,63 @@ static int	ft_export2(t_envs *cur, t_envs *envs, char *var_name, char *cont)
 	return (db_error("setenv error in ft_export", 0));
 }
 
-// ft_export takes in an already allocated *var_name and *contents variables,
-//  aswell as an initiated envs list, and either overwrites or creates a new,
-//  environmental variable.
+char *set_var_name(char *arg)
+{
+	int		i;
+	char	*rtn;
+
+	i = 0;
+	while (arg[i] && arg[i] != '=')
+		i++;
+	if (!arg[i])
+		return (NULL);
+	rtn = malloc(i + 1);
+	if (!rtn)
+		return (NULL);
+	rtn[i] = 0;
+	ft_strlcpy(rtn, arg, i + 1);
+	return (rtn);
+}
+
+char *set_contents(char *arg)
+{
+	int	i;
+
+	i = 0;
+	char *rtn;
+	while (arg[i] && arg[i] != '=')
+		i++;
+	if (!arg[i])
+		return (NULL);
+	rtn = malloc (ft_strlen(&arg[i + 1]) + 1);
+	if (!rtn)
+		return (NULL);
+	ft_strlcpy(rtn, &arg[i + 1], ft_strlen(&arg[i]));
+	return (rtn);
+}
+
+// ft_export takes in an argv array aswell as an envs list, 
+//  and either overwrites or creates a new environmental variable.
 // ft_export will return 0 upon error, and 1 upon success.
-// upon error ft_export will free *var_name and *contents, but not *env.
-int	ft_export(char *var_name, char *contents, t_envs *envs)
+// ft_export will NOT free **argv nor *envs.
+int	ft_export(char **argv, t_envs *envs)
 {
 	t_envs	*current;
+	char	*var_name;
+	char	*contents;
 
-	if (!envs)
-		return (db_error("ft_export recieved a NULL envs variable", 0));
-	if (!contents)
-		return (db_error("ft_export recieved a NULL contents variable", 0));
+	// remake to include frees for contents and var_name
+	if (!envs || !argv || !argv[0] || !argv[1] || argv[2])
+		return (db_error("ft_export NULL or invalid input", 0));
+	var_name = set_var_name(argv[1]);
 	if (!var_name)
-		return (db_error("ft_export recieved a NULL var_name variable", 0));
+		return (0);
+	contents = set_contents(argv[1]);
+	if (!contents)
+	{
+		free(var_name);
+		return (0);
+	}
 	current = find_in_env_list(var_name, envs);
 	if (!current)
 		return (ft_export2(current, envs, var_name, contents));

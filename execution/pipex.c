@@ -114,6 +114,7 @@ int	check_pipes(t_pipex *pipex)
 	return (1);
 }
 
+// adapt pipex to take in fds from the command list
 int	pipex(char **input, char **envp, t_envs *envs)
 {
 	t_pipex	*pipex;
@@ -125,6 +126,9 @@ int	pipex(char **input, char **envp, t_envs *envs)
 		return (0);
 	if (!check_pipes(pipex))
 		return (0);
+
+	// dup the fds and dup them to work
+
 	if (!exec_pipex(pipex, envs))
 		return (0);
 	close_all_pipes(pipex);

@@ -14,7 +14,7 @@
 
 static void	string_state_lexer(char **cmd, t_lex_state *state, t_list **tokens)
 {
-	ft_printf("entering string state lexer\n");
+	// ft_printf("entering string state lexer\n");
 
 	transist(state, **cmd);
 	if (**cmd == '|')
@@ -51,9 +51,9 @@ static void	quotes_state_lexer(char **cmd, t_lex_state *state, t_list **tokens,
 
 static void	initial_state_lexer(char **cmd, t_lex_state *state, t_list **tokens)
 {
-	ft_printf("initial state lexer\n");
+	// ft_printf("initial state lexer\n");
 	transist(state, **cmd);
-	ft_printf("transist checked\n");
+	// ft_printf("transist checked\n");
 	if (ft_strchr("'\"", **cmd))
 		ft_lstadd_back(tokens, new_lexer_token(T_STRING, ft_strdup("")));
 	else if (**cmd == '|')
@@ -73,7 +73,7 @@ static void	initial_state_lexer(char **cmd, t_lex_state *state, t_list **tokens)
 				+ 1) == '<'))
 		(*cmd)++;
 	(*cmd)++;
-	ft_printf("end of initial state lexer\n");
+	// ft_printf("end of initial state lexer\n");
 }
 
 t_list	*lexer_analysis(char *input)
@@ -83,11 +83,11 @@ t_list	*lexer_analysis(char *input)
 
 	current_state = L_INIT;
 	token_list = NULL;
-	ft_printf("lexer_analysis start\n");
+	// ft_printf("lexer_analysis start\n");
 	while (*input)
 	{
-		ft_printf("lexer loop state == %d\n", current_state);
-		ft_printf("lexer loop taking input %s\n", input);
+		// ft_printf("lexer loop state == %d\n", current_state);
+		// ft_printf("lexer loop taking input %s\n", input);
 		if (current_state == L_INIT)
 			initial_state_lexer(&input, &current_state, &token_list);
 		else if (current_state == L_QUOTE)
@@ -97,7 +97,7 @@ t_list	*lexer_analysis(char *input)
 		else
 			string_state_lexer(&input, &current_state, &token_list);
 	}
-	ft_printf("lexer loop end\n");
+	// ft_printf("lexer loop end\n");
 	if (current_state == L_QUOTE || current_state == L_DQUOTE)
 	{
 		db_nerror("lexer syntax error quote not closed");

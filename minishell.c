@@ -28,15 +28,15 @@ static t_list	*get_command_list(char *input_line, t_data *data)
 	t_list	*commands_list;
 	char	*buffer;
 
-	ft_printf("get command list start\n");
+	// ft_printf("get command list start\n");
 	if (!input_line)
 	{
 		ft_putendl_fd("exit", STDOUT_FILENO);
 		close_shell(data);
 	}
-	ft_printf("input line: %s\n", input_line);
+	// ft_printf("input line: %s\n", input_line);
 	buffer = replace_envs(input_line, convert_envs_to_envp(data->envs));
-	ft_printf("buffer line: %s\n", buffer);
+	// ft_printf("buffer line: %s\n", buffer);
 	if (!buffer)
 	{
 		ft_putendl_fd("exit", STDOUT_FILENO);
@@ -72,6 +72,33 @@ static t_data	*init_data(char **env)
 	return (data);
 }
 
+int	exec_without_pipes(t_data *data)
+{
+	t_command *cmd;
+
+	if (!data || !data->command_list || !data->command_list->content)
+		return (db_error("exec_without_pipes recieved NULL data", 0));
+	cmd = data->command_list->content;
+	if (!cmd || !cmd->args)
+		return (db_error("exec_without_pipes recieved NULL input", 0));
+	if (ft_strcmp("echo", cmd->args[0]) == 0)
+		ft_echo(cmd->args);
+	else if (ft_strcmp("cd", cmd->args[0]) == 0)
+		ft_cd(cmd->args, data->env); // make sure data->env and data->envs is synced
+	else if (ft_strcmp("env", cmd->args[0]) == 0)
+		ft_env(data->envs);
+	else if (ft_strcmp("export", cmd->args[0]) == 0)
+		ft_export(cmd->args, data->envs);
+	else if (ft_strcmp ("pwd", cmd->args[0]) == 0)
+		ft_pwd();
+	else
+	{
+		// fork
+		// execve
+	}
+	return (1);
+}
+
 int	main(int argc, char **argv, char **envp)
 {
 	t_data	*data;
@@ -85,18 +112,18 @@ int	main(int argc, char **argv, char **envp)
 		return (255); //can be also 0, no pronlem
 	while (42)
 	{
-		ft_printf("main while loop complete\n");
+		// ft_printf("main while loop complete\n");
 		set_interactive_signals();
 		input = readline("MiniShell% > ");
-		ft_printf("taken input from readline:\n%s\n", input);
+		// ft_printf("taken input from readline:\n%s\n", input);
 		add_history(input);
-		ft_printf("added input to history\n");
+		// ft_printf("added input to history\n");
 		set_non_interactive_signals();
 		data->command_list = get_command_list(input, data);
 		if (!data->command_list)
 			continue ;
 
-		ft_printf("Valid command list found\n\n");
+		// ft_printf("Valid command list found\n\n");
 		// translate
 
 		int	i = 0;
@@ -120,6 +147,7 @@ int	main(int argc, char **argv, char **envp)
 		}
 
 		// execute
+		exec_without_pipes(data);
 		/* if (ft_lstsize(data->command_list) == 1)
 			g_status.status_code = execute_input(data, data->command_list);
 		else if (ft_lstsize(data->command_list) > 1)
@@ -133,29 +161,9 @@ int	main(int argc, char **argv, char **envp)
 	return (EXIT_SUCCESS);
 }
 
-// int test(const char *s)
-// {
-// 	int	i;
 
-// 	i = 0;
-// 	while (*s != '\0')
-// 	{
-// 		s++;
-// 		i++;
-// 	}
-// 	return (i);
-// }
 
-// int main(void)
-// {
-// 	char str = "hello";
-// 	int i;
 
-// 	i = 0;
-
-// 	ft_print("str = %d\n", test("hello"));
-// 	return (1);
-// }
 
 
 // int	main(int argc, char **argv, char **envp)
@@ -171,8 +179,8 @@ int	main(int argc, char **argv, char **envp)
 // 	char	**input;
 
 // 	input = (char **)ft_calloc(128, sizeof(char *));
-// 	input[0] = ft_strdup("wc");
-// 	input[1] = ft_strdup("/nfs/homes/dbozic/minishell/test.txt");
+// 	input[0] = ft_strdup("echo");
+// 	input[1] = ft_strdup("$HOME");
 // 	input[2] = ft_strdup("'PIPE");
 // 	input[3] = ft_strdup("cat");
 // 	// input[1] = ft_strdup("'PIPE");

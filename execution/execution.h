@@ -38,13 +38,13 @@ typedef struct s_pipex
 }		t_pipex;
 
 int		ft_pwd(void);
-int		ft_echo(char **argv, char **envp);
+int		ft_echo(char **argv);
 int		ft_cd(char **argv, char **envp);
 
 t_envs	*init_envs(char **envp, t_envs *head, t_envs *current, t_envs *last);
 int		free_envs(t_envs *envs);
 t_envs	*find_in_env_list(char *name, t_envs *envs);
-int		ft_export(char *var_name, char *contents, t_envs *envs);
+int		ft_export(char **argv, t_envs *envs);
 int		ft_unset(char *var_name, t_envs *envs);
 int		ft_env(t_envs *envs);
 char	**convert_envs_to_envp(t_envs *envs);

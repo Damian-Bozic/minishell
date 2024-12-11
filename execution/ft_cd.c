@@ -20,10 +20,7 @@
 
 int	ft_cd(char **argv, char **envp)
 {
-	char	*dir;
-
-	dir = NULL;
-	if (!argv)
+	if (!argv || !argv[0])
 		return (db_error("ft_cd recieved a NULL argv", 0));
 	if (argv[0] && argv[1] && argv[2])
 		return (db_error("ft_cd recieved too many arguments", 0));
@@ -33,16 +30,11 @@ int	ft_cd(char **argv, char **envp)
 			return (db_error("ft_cd failed to find a $HOME directory", 0));
 		return (1);
 	}
-	dir = replace_envs(argv[1], envp);
-	if (!dir)
-		return (db_error("malloc fail in ft_cd", 0));
-	if (chdir(dir) == -1)
+	if (chdir(argv[1]) == -1)
 	{
-		ft_printf("no such file or directory: %s\n", dir);
-		free(dir);
+		ft_printf("no such file or directory: %s\n", argv[1]);
 		return (0);
 	}
-	free(dir);
 	return (1);
 }
 
@@ -202,4 +194,36 @@ int	ft_cd(char **argv, char **envp)
 // 	}
 // 	free(cwd);
 // 	return (db_error("ft_cd failed to getcwd", 0));
+// }
+
+
+
+
+// semi final arg replacing cd
+// int	ft_cd(char **argv, char **envp)
+// {
+// 	char	*dir;
+
+// 	dir = NULL;
+// 	if (!argv)
+// 		return (db_error("ft_cd recieved a NULL argv", 0));
+// 	if (argv[0] && argv[1] && argv[2])
+// 		return (db_error("ft_cd recieved too many arguments", 0));
+// 	if (!argv[1])
+// 	{
+// 		if (chdir(ft_getenv("HOME", envp)) == -1)
+// 			return (db_error("ft_cd failed to find a $HOME directory", 0));
+// 		return (1);
+// 	}
+// 	dir = replace_envs(argv[1], envp);
+// 	if (!dir)
+// 		return (db_error("malloc fail in ft_cd", 0));
+// 	if (chdir(dir) == -1)
+// 	{
+// 		ft_printf("no such file or directory: %s\n", dir);
+// 		free(dir);
+// 		return (0);
+// 	}
+// 	free(dir);
+// 	return (1);
 // }
