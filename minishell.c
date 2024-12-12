@@ -149,8 +149,8 @@ int	exec_without_pipes(t_data *data)
 	if (!cmd || !cmd->args || !cmd->args[0])
 		return (db_error("exec_without_pipes recieved NULL input", 0));
 	printf("fd in = %d and ft out = %d\n", cmd->in_fileno, cmd->out_fileno);
-	// dup2(cmd->in_fileno, STDIN_FILENO);
-	// dup2(STDOUT_FILENO, cmd->out_fileno);
+	dup2(cmd->in_fileno, STDIN_FILENO);
+	dup2(cmd->out_fileno, STDOUT_FILENO);
 	if (ft_strcmp("echo", cmd->args[0]) == 0)
 		ft_echo(cmd->args);
 	else if (ft_strcmp("cd", cmd->args[0]) == 0)
