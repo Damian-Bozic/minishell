@@ -31,33 +31,35 @@ static void	ft_unset2(t_envs *envs, t_envs *prev, t_envs *env)
 	}
 }
 
-// ft_unset takes in a var_name str, and an initialized *envs list,
+// ft_unset takes in argv, and an initialized *envs list,
 //  then unsets the variable under the var_name.
 // ft_unset returns 0 upon error and 1 upon success.
 // ft_unset will not print an error if the name given through var_name,
 //  does not exist in the *envs list.
-int	ft_unset(char *var_name, t_envs *envs)
+// ft_unset does not free argv or envs.
+int	ft_unset(char **argv, t_envs *envs)
 {
 	t_envs	*env;
 	t_envs	*prev;
 
-	if (!var_name)
+
+	if (!argv || !argv[0] || !argv[1])
 		return (db_error("ft_unset recieved NULL var_name", 0));
 	env = NULL;
-	env = find_in_env_list(var_name, envs);
+	env = find_in_env_list(argv[1], envs);
 	if (!env)
 		return (0);
 	env = envs;
 	prev = NULL;
 	while (env)
 	{
-		if (!ft_strcmp(env->name, var_name))
+		if (!ft_strcmp(env->name, argv[1]))
 			break ;
 		prev = env;
 		env = env->next;
 	}
 	ft_unset2(envs, prev, env);
-	if (unsetenv(var_name) != 0)
+	if (unsetenv(argv[1]) != 0)
 		return (db_error("unsetenv fail in ft_unset", 0));
 	return (1);
 }

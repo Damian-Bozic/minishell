@@ -43,7 +43,14 @@ static t_list	*get_command_list(char *input_line, t_data *data)
 		close_shell(data);		
 	}
 	// expand_variables(); something to get our ex.variables
-	// data->env = convert_envs_to_envp(data->envs);
+	if (data->env)
+		free(data->env);
+	data->env = convert_envs_to_envp(data->envs);
+	if (!data->env)
+	{
+		//free everything and close
+		db_nerror("data->env failed to allocated");
+	}
 	tokens_list = lexer_analysis(buffer);
 	free(input_line);
 	free(buffer);
@@ -72,15 +79,78 @@ static t_data	*init_data(char **env)
 	return (data);
 }
 
+static char	**init_exec_dir(t_data *data, char *input)
+{
+	int		i;
+	char	**rtn;
+	char	*temp;
+
+	i = 0;
+	temp = ft_getenv("PATH", data->env);
+	if (!temp)
+		return (db_nerror("init_exec_dir failed to find $PATH var"));
+	rtn = ft_split(temp, ':');
+	if (!rtn)
+		return (db_nerror("malloc fail in exec_without_pipes"));
+	while (rtn[i])
+	{
+		temp = ft_strjoin(rtn[i], "/");
+		if (!temp)
+			return (db_nerror("malloc fail in exec_without_pipes"));
+		free(rtn[i]);
+		rtn[i] = temp;
+		temp = ft_strjoin(rtn[i], input);
+		if (!temp)
+			return (db_nerror("malloc fail in exec_without_pipes"));
+		free(rtn[i]);
+		rtn[i] = temp;
+		i++;
+	}
+	return (rtn);
+}
+
+int	exec_without_pipes2(t_data *data, t_command *cmd)
+{
+	int		pid;
+	int		i;
+	char	**dir;
+
+	i = 0;
+	dir = init_exec_dir(data, cmd->args[0]);
+	if (!dir)
+	{
+		return (0);
+	}
+	pid = fork();
+	if (pid == -1)
+		return (0);
+	if (pid == 0)
+	{
+		while (dir[i] && execve(dir[i], cmd->args, data->env) == -1)
+			i++;
+		ft_putstr_fd(cmd->args[0], 2);
+		write(2, ": command not found\n", 21);
+		free_ptr_array(dir);
+		//free *data here
+		exit(0);
+	}
+	waitpid(pid, NULL, 0);
+	return (1);
+}
+
 int	exec_without_pipes(t_data *data)
 {
 	t_command *cmd;
 
+
 	if (!data || !data->command_list || !data->command_list->content)
 		return (db_error("exec_without_pipes recieved NULL data", 0));
 	cmd = data->command_list->content;
-	if (!cmd || !cmd->args)
+	if (!cmd || !cmd->args || !cmd->args[0])
 		return (db_error("exec_without_pipes recieved NULL input", 0));
+	printf("fd in = %d and ft out = %d\n", cmd->in_fileno, cmd->out_fileno);
+	// dup2(cmd->in_fileno, STDIN_FILENO);
+	// dup2(STDOUT_FILENO, cmd->out_fileno);
 	if (ft_strcmp("echo", cmd->args[0]) == 0)
 		ft_echo(cmd->args);
 	else if (ft_strcmp("cd", cmd->args[0]) == 0)
@@ -91,12 +161,9 @@ int	exec_without_pipes(t_data *data)
 		ft_export(cmd->args, data->envs);
 	else if (ft_strcmp ("pwd", cmd->args[0]) == 0)
 		ft_pwd();
-	else
-	{
-		// fork
-		// execve
-	}
-	return (1);
+	else if (ft_strcmp("unset", cmd->args[0]) == 0)
+		ft_unset(cmd->args, data->envs);
+	return (exec_without_pipes2(data, cmd));
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -132,21 +199,21 @@ int	main(int argc, char **argv, char **envp)
 		cur = data->command_list;
 		while (cur)
 		{
-			printf("START OF NODE\n");
+			// printf("START OF NODE\n");
 			command = (t_command *)cur->content;
 			i = 0;
 			// pipex(command->args, convert_envs_to_envp(data->envs), data->envs);
 			while (command->args[i])
 			{
-				printf("%s\n", command->args[i]);
+				// printf("%s\n", command->args[i]);
 				i++;
 			}
 
-			printf("END OF NODE\n");
+			// printf("END OF NODE\n");
 			cur = cur->next;
 		}
 
-		// execute
+		// executesadas
 		exec_without_pipes(data);
 		/* if (ft_lstsize(data->command_list) == 1)
 			g_status.status_code = execute_input(data, data->command_list);
@@ -155,7 +222,7 @@ int	main(int argc, char **argv, char **envp)
         
         this is how i'm seing that, but it's okay to change it
             */
-		ft_printf("\n");
+		// ft_printf("\n");
 		free_command_list(&(data->command_list));
 	}
 	return (EXIT_SUCCESS);
