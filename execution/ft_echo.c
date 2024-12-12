@@ -33,6 +33,8 @@ int	ft_echo(char **argv)
 		ft_printf("%s", argv[i]);
 		i++;
 	}
+	if (!flag)
+		ft_printf("\n");
 	return (1);
 }
 

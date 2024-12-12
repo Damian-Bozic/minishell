@@ -142,7 +142,6 @@ int	exec_without_pipes(t_data *data)
 {
 	t_command *cmd;
 
-
 	if (!data || !data->command_list || !data->command_list->content)
 		return (db_error("exec_without_pipes recieved NULL data", 0));
 	cmd = data->command_list->content;
@@ -163,7 +162,9 @@ int	exec_without_pipes(t_data *data)
 		ft_pwd();
 	else if (ft_strcmp("unset", cmd->args[0]) == 0)
 		ft_unset(cmd->args, data->envs);
-	return (exec_without_pipes2(data, cmd));
+	else
+		return (exec_without_pipes2(data, cmd));
+	return (1);
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -199,17 +200,17 @@ int	main(int argc, char **argv, char **envp)
 		cur = data->command_list;
 		while (cur)
 		{
-			// printf("START OF NODE\n");
+			printf("START OF NODE\n");
 			command = (t_command *)cur->content;
 			i = 0;
 			// pipex(command->args, convert_envs_to_envp(data->envs), data->envs);
 			while (command->args[i])
 			{
-				// printf("%s\n", command->args[i]);
+				printf("%s\n", command->args[i]);
 				i++;
 			}
 
-			// printf("END OF NODE\n");
+			printf("END OF NODE\n");
 			cur = cur->next;
 		}
 
