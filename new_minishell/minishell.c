@@ -83,7 +83,6 @@ int	main(int argc, char **argv, char **envp)
 		else if (ft_lstsize(data->command_list) > 1)
 			g_status.status_code = execute_with_pipe(data);
 		free_command_list(&(data->command_list));
-		free(input);
 	}
 	return (0);
 }
