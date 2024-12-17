@@ -25,15 +25,18 @@ char	*get_env_value(t_data *data, char *key)
 	{
 		args = split_env(data->env[i]);
 		if (!args || !args[0] || !args[1])
-			return (free_split(args), NULL);
-		if (ft_strncmp(args[0], key, key_len) == 0)
+		{
+			free_split(args);
+			continue ;
+		}
+		if (ft_strncmp(args[0], key, key_len) == 0
+			&& ft_strlen(args[0]) == key_len)
 		{
 			res = ft_strdup(args[1]);
 			free_split(args);
 			return (res);
 		}
-		else
-			free_split(args);
+		free_split(args);
 		i++;
 	}
 	return (NULL);
@@ -50,13 +53,14 @@ int	get_env_index(char **env, char *var)
 	i = 0;
 	while (env[i])
 	{
-		if (ft_strncmp(tmp, env[i], ft_strlen(tmp)) == 0)
-			break ;
+		if (env[i] && ft_strncmp(tmp, env[i], ft_strlen(tmp)) == 0)
+		{
+			free(tmp);
+			return (i);
+		}
 		i++;
 	}
 	free(tmp);
-	if (env[i])
-		return (i);
 	return (-1);
 }
 
@@ -83,6 +87,7 @@ int	add_to_env(char ***env, char *key, char *value)
 {
 	int		idx;
 	char	*eq_value;
+	char	*new_entry;
 
 	idx = get_env_index(*env, key);
 	if (!value)
@@ -90,18 +95,27 @@ int	add_to_env(char ***env, char *key, char *value)
 	eq_value = ft_strjoin("=", value);
 	if (!eq_value)
 		return (12);
+	new_entry = ft_strjoin(key, eq_value);
+	if (!new_entry)
+	{
+		free(eq_value);
+		return (12);
+	}
 	if (idx != -1 && (*env)[idx])
 	{
 		free((*env)[idx]);
-		(*env)[idx] = ft_strjoin(key, eq_value);
+		(*env)[idx] = new_entry;
 	}
 	else
 	{
 		idx = calc_env_size(*env);
 		*env = realloc_env(env, idx + 1);
 		if (!(*env))
+		{
+			free(new_entry);
 			return (12);
-		(*env)[idx] = ft_strjoin(key, eq_value);
+		}
+		(*env)[idx] = new_entry;
 	}
 	free(eq_value);
 	return (0);
@@ -111,17 +125,17 @@ int	delete_line_env(char ***env, int pos)
 {
 	int	i;
 
-	if ((size_t)pos > calc_env_size(*env))
+	if ((size_t)pos >= calc_env_size(*env))
 		return (0);
 	if ((*env)[pos])
 		free((*env)[pos]);
 	i = pos;
 	while ((*env)[i + 1])
 	{
-		(*env)[i] = ft_strdup((*env)[i + 1]);
-		free((*env)[i + 1]);
+		(*env)[i] = (*env)[i + 1];
 		i++;
 	}
+	(*env)[i] = NULL;
 	*env = realloc_env(env, i);
 	if (!(*env))
 		return (0);
