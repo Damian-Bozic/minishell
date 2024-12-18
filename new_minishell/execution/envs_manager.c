@@ -12,6 +12,16 @@
 
 #include "minishell.h"
 
+static int	get_env_value2(char **args, char *key, size_t key_len)
+{
+	if (ft_strncmp(args[0], key, key_len) == 0
+		&& ft_strlen(args[0]) == key_len)
+	{
+		return (0);
+	}
+	return (1);
+}
+
 char	*get_env_value(t_data *data, char *key)
 {
 	char	**args;
@@ -29,8 +39,7 @@ char	*get_env_value(t_data *data, char *key)
 			free_split(args);
 			continue ;
 		}
-		if (ft_strncmp(args[0], key, key_len) == 0
-			&& ft_strlen(args[0]) == key_len)
+		if (!get_env_value2(args, key, key_len))
 		{
 			res = ft_strdup(args[1]);
 			free_split(args);
@@ -64,62 +73,69 @@ int	get_env_index(char **env, char *var)
 	return (-1);
 }
 
-static char	**realloc_env(char ***env, int size)
-{
-	char	**new_env;
-	int		i;
+// static char	**realloc_env(char ***env, int size)
+// {
+// 	char	**new_env;
+// 	int		i;
 
-	new_env = ft_calloc(size + 1, sizeof(char *));
-	if (!new_env)
-		return (NULL);
-	i = 0;
-	while ((*env)[i] && i < size)
-	{
-		new_env[i] = ft_strdup((*env)[i]);
-		free((*env)[i]);
-		i++;
-	}
-	free(*env);
-	return (new_env);
-}
+// 	new_env = ft_calloc(size + 1, sizeof(char *));
+// 	if (!new_env)
+// 		return (NULL);
+// 	i = 0;
+// 	while ((*env)[i] && i < size)
+// 	{
+// 		new_env[i] = ft_strdup((*env)[i]);
+// 		free((*env)[i]);
+// 		i++;
+// 	}
+// 	free(*env);
+// 	return (new_env);
+// }
 
-int	add_to_env(char ***env, char *key, char *value)
-{
-	int		idx;
-	char	*eq_value;
-	char	*new_entry;
+// static int	add_to_env2(char ***env, int *idx, char *new_entry)
+// {
+// 	if (*idx != -1 && (*env)[*idx])
+// 	{
+// 		free((*env)[*idx]);
+// 		(*env)[*idx] = new_entry;
+// 	}
+// 	else
+// 	{
+// 		*idx = calc_env_size(*env);
+// 		*env = realloc_env(env, *idx + 1);
+// 		if (!(*env))
+// 		{
+// 			free(new_entry);
+// 			return (12);
+// 		}
+// 		(*env)[*idx] = new_entry;
+// 	}
+// 	return (1);
+// }
 
-	idx = get_env_index(*env, key);
-	if (!value)
-		value = "";
-	eq_value = ft_strjoin("=", value);
-	if (!eq_value)
-		return (12);
-	new_entry = ft_strjoin(key, eq_value);
-	if (!new_entry)
-	{
-		free(eq_value);
-		return (12);
-	}
-	if (idx != -1 && (*env)[idx])
-	{
-		free((*env)[idx]);
-		(*env)[idx] = new_entry;
-	}
-	else
-	{
-		idx = calc_env_size(*env);
-		*env = realloc_env(env, idx + 1);
-		if (!(*env))
-		{
-			free(new_entry);
-			return (12);
-		}
-		(*env)[idx] = new_entry;
-	}
-	free(eq_value);
-	return (0);
-}
+// int	add_to_env(char ***env, char *key, char *value)
+// {
+// 	int		idx;
+// 	char	*eq_value;
+// 	char	*new_entry;
+
+// 	idx = get_env_index(*env, key);
+// 	if (!value)
+// 		value = "";
+// 	eq_value = ft_strjoin("=", value);
+// 	if (!eq_value)
+// 		return (12);
+// 	new_entry = ft_strjoin(key, eq_value);
+// 	if (!new_entry)
+// 	{
+// 		free(eq_value);
+// 		return (12);
+// 	}
+// 	if (add_to_env2(env, &idx, new_entry) == 12)
+// 		return (12);
+// 	free(eq_value);
+// 	return (0);
+// }
 
 int	delete_line_env(char ***env, int pos)
 {

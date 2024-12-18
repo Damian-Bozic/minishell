@@ -15,8 +15,8 @@
 void	transist(t_lex_state *current_state, char ch_read)
 {
 	if ((*current_state == L_QUOTE && ch_read == '\'')
-			|| (*current_state == L_DQUOTE && ch_read == '"')
-			|| (*current_state == L_INIT && !ft_strchr("<' |\">", ch_read)))
+		|| (*current_state == L_DQUOTE && ch_read == '"')
+		|| (*current_state == L_INIT && !ft_strchr("<' |\">", ch_read)))
 	{
 		*current_state = L_STRING;
 	}

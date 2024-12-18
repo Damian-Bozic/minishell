@@ -61,6 +61,12 @@ static void	concat_me(char **line, int count, char *var_value, int var_name_len)
 	free(str2);
 }
 
+static void	expand_variables2(int *line_count, char **var_value)
+{
+	*line_count += ft_strlen(*var_value);
+	free(*var_value);
+}
+
 void	expand_variables(char **line, t_data *data, bool expand_quotes)
 {
 	int		var_name_len;
@@ -83,12 +89,9 @@ void	expand_variables(char **line, t_data *data, bool expand_quotes)
 				return ;
 			if (var_name_len != 0)
 				concat_me(line, line_count, var_value, var_name_len);
-			line_count += ft_strlen(var_value);
-			free(var_value);
+			expand_variables2(&line_count, &var_value);
 		}
 		else
-		{
 			line_count++;
-		}
 	}
 }

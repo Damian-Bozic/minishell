@@ -41,6 +41,12 @@ t_error	set_stdout(t_list *cmd_list, char *fname, bool is_append)
 	return (NO_ERROR);
 }
 
+static t_error	aca2(char **argv)
+{
+	free(argv);
+	return (MALLOC);
+}
+
 t_error	append_command_arg(t_list *cmd_list, char *new_arg)
 {
 	t_command	*cmd;
@@ -61,42 +67,9 @@ t_error	append_command_arg(t_list *cmd_list, char *new_arg)
 	}
 	argv[i] = ft_strdup(new_arg);
 	if (!argv[i])
-	{
-		free(argv);
-		return (MALLOC);
-	}
+		return (aca2(argv));
 	cmd->ac++;
 	free(cmd->args);
 	cmd->args = argv;
-	return (NO_ERROR);
-}
-
-t_error	append_command(t_list **cmd_list, char *new_cmd)
-{
-	t_command	*cmd;
-
-	if (!cmd_list)
-		return (MALLOC);
-	cmd = ft_calloc(1, sizeof(t_command));
-	if (!cmd)
-		return (MALLOC);
-	cmd->args = ft_calloc(2, sizeof(char *));
-	if (!cmd->args)
-	{
-		free(cmd);
-		return (MALLOC);
-	}
-	if (new_cmd)
-	{
-		cmd->args[0] = ft_strdup(new_cmd);
-		if (!cmd->args[0])
-		{
-			free(cmd->args);
-			free(cmd);
-			return (MALLOC);
-		}
-		cmd->ac = 1;
-	}
-	ft_lstadd_back(cmd_list, ft_lstnew(cmd));
 	return (NO_ERROR);
 }

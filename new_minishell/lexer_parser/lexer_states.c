@@ -47,11 +47,38 @@ static void	quotes_state_lexer(char **cmd, t_lex_state *state, t_list **tokens,
 	(*cmd)++;
 }
 
+static int	isl2(char **cmd, t_list **tokens, char *value, t_list *new_token)
+{
+	if (**cmd == '<' && *((*cmd) + 1) == '<')
+	{
+		ft_lstadd_back(tokens, new_lexer_token(T_HEREDOC, NULL));
+		(*cmd)++;
+	}
+	else if (**cmd == '<')
+		ft_lstadd_back(tokens, new_lexer_token(T_REDIR_IN, NULL));
+	else if (**cmd != ' ')
+	{
+		value = ft_substr(*cmd, 0, 1);
+		if (!value)
+			return (0);
+		new_token = new_lexer_token(T_STRING, value);
+		if (!new_token)
+		{
+			free(value);
+			return (0);
+		}
+		ft_lstadd_back(tokens, new_token);
+	}
+	return (1);
+}
+
 static void	initial_state_lexer(char **cmd, t_lex_state *state, t_list **tokens)
 {
 	char	*value;
 	t_list	*new_token;
 
+	value = NULL;
+	new_token = NULL;
 	transist(state, **cmd);
 	if (ft_strchr("'\"", **cmd))
 		ft_lstadd_back(tokens, new_lexer_token(T_STRING, ft_strdup("")));
@@ -64,26 +91,8 @@ static void	initial_state_lexer(char **cmd, t_lex_state *state, t_list **tokens)
 	}
 	else if (**cmd == '>')
 		ft_lstadd_back(tokens, new_lexer_token(T_REDIR_OUT, NULL));
-	else if (**cmd == '<' && *((*cmd) + 1) == '<')
-	{
-		ft_lstadd_back(tokens, new_lexer_token(T_HEREDOC, NULL));
-		(*cmd)++;
-	}
-	else if (**cmd == '<')
-		ft_lstadd_back(tokens, new_lexer_token(T_REDIR_IN, NULL));
-	else if (**cmd != ' ')
-	{
-		value = ft_substr(*cmd, 0, 1);
-		if (!value)
-			return ;
-		new_token = new_lexer_token(T_STRING, value);
-		if (!new_token)
-		{
-			free(value);
-			return ;
-		}
-		ft_lstadd_back(tokens, new_token);
-	}
+	else if (!isl2(cmd, tokens, value, new_token))
+		return ;
 	if ((**cmd == '>' && *((*cmd) + 1) == '>') || (**cmd == '<' && *((*cmd)
 				+ 1) == '<'))
 		(*cmd)++;
@@ -92,8 +101,8 @@ static void	initial_state_lexer(char **cmd, t_lex_state *state, t_list **tokens)
 
 t_list	*lexer_analysis(char *input)
 {
-	t_lex_state current_state;
-	t_list *token_list;
+	t_lex_state	current_state;
+	t_list		*token_list;
 
 	current_state = L_INIT;
 	token_list = NULL;

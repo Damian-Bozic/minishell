@@ -18,10 +18,12 @@ MAIN = minishell.c
 SOURCES = $(addprefix execution/, \
 		envs_manager.c envs_split.c envs_utils.c execute_utils.c \
 		execute.c ft_cd.c ft_echo.c ft_env.c ft_exit.c ft_export.c \
-		ft_pwd.c ft_unset.c parser_env.c pipex.c variable_expansion.c) \
+		ft_pwd.c ft_unset.c parser_env.c pipex.c variable_expansion.c \
+		envs_manager2.c ) \
 		$(addprefix lexer_parser/, \
 		free_command_list.c heredoc.c lexer_states.c parser_actions.c \
-		parser_analizer.c parser_states.c signals.c token_actions.c) \
+		parser_analizer.c parser_states.c signals.c token_actions.c \
+		parser_actions2.c ) \
 		helper_functions/db_error.c \
 		helper_functions/print_errors.c  \
 		

@@ -113,7 +113,7 @@ int	execute_with_pipe(t_data *data)
 		if (last_pid < 0)
 			return (last_pid);
 		if (last_pid == 0)
-			exit(execute_input(data, cmd_list));
+			close_shell(data, execute_input(data, cmd_list));
 		cmd_list = cmd_list->next;
 	}
 	cmd_list = data->command_list;

@@ -180,4 +180,6 @@ int					print_error(char *command, char *detail,
 						char *error_message, int err);
 char				*join_strs(char *str, char *add);
 
+char				**realloc_env(char ***env, int size);
+
 #endif
