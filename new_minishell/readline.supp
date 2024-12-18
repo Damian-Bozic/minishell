@@ -1,0 +1,8 @@
+{
+   ignore_readline_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:*libreadline*
+}
+
